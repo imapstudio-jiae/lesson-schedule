@@ -3,28 +3,42 @@
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
   --font-display: 'Outfit', var(--font-sans);
 
-  /* 테마 컬러 팔레트 */
-  --color-bg-base: #F8F6F2;
+  /* 테마 베이스 컬러 (소프트 민트 & 라벤더 파스텔 하모니) */
+  --color-bg-base: #F8FBFB;
   --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F3EFEA;
+  --color-bg-subtle: #F3F7F8;
   
-  --color-primary: #EA580C;
-  --color-primary-hover: #C2410C;
-  --color-primary-light: #FFEDD5;
-  --color-primary-subtle: #FFF7ED;
+  /* 메인 액센트: 세련된 소프트 바이올렛 */
+  --color-primary: #7C3AED;
+  --color-primary-hover: #6D28D9;
+  --color-primary-light: #EDE9FE;
+  --color-primary-subtle: #F5F3FF;
 
-  --color-text-main: #1C1917;
-  --color-text-muted: #57534E;
-  --color-text-tertiary: #A8A29E;
+  /* 조화로운 민트 & 틸 컬러 */
+  --color-mint-light: #CCFBF1;
+  --color-mint-subtle: #F0FDFA;
+  --color-mint-border: #99F6E4;
+  --color-mint-accent: #0D9488;
+
+  /* 배경과 부드럽게 어우러지는 웜 살구/피치 오렌지 */
+  --color-apricot: #E87A5D;
+  --color-apricot-hover: #D76547;
+  --color-apricot-light: #FFF4ED;
+  --color-apricot-subtle: #FFF9F6;
+  --color-apricot-border: #FED7C3;
+
+  --color-text-main: #1E1B2E;
+  --color-text-muted: #59556C;
+  --color-text-tertiary: #9893A8;
   
-  --color-border: #E7E2DA;
-  --color-border-subtle: #F0ECE4;
-  --color-border-hover: #D6CFC4;
+  --color-border: #E4E8EE;
+  --color-border-subtle: #EFF2F6;
+  --color-border-hover: #D2D8E2;
 
-  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.05);
-  --shadow-md: 0 4px 16px -2px rgba(28, 25, 23, 0.07);
-  --shadow-lg: 0 12px 32px -4px rgba(28, 25, 23, 0.12);
-  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(30, 27, 46, 0.04);
+  --shadow-md: 0 6px 20px -2px rgba(30, 27, 46, 0.07);
+  --shadow-lg: 0 14px 36px -4px rgba(30, 27, 46, 0.12);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -46,9 +60,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-image: 
-    radial-gradient(at 10% 20%, rgba(254, 215, 170, 0.25) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, rgba(253, 230, 138, 0.2) 0px, transparent 50%),
-    radial-gradient(at 50% 90%, rgba(254, 243, 199, 0.3) 0px, transparent 60%);
+    radial-gradient(at 10% 12%, rgba(45, 212, 191, 0.22) 0px, transparent 48%),
+    radial-gradient(at 90% 14%, rgba(167, 139, 250, 0.26) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(204, 251, 241, 0.25) 0px, transparent 60%),
+    radial-gradient(at 20% 80%, rgba(237, 233, 254, 0.28) 0px, transparent 55%);
   background-attachment: fixed;
   min-height: 100vh;
 }
@@ -62,11 +77,11 @@ body {
   background: var(--color-bg-subtle);
 }
 ::-webkit-scrollbar-thumb {
-  background: #D6CFC4;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A8A29E;
+  background: #94A3B8;
 }
 
 button {
@@ -92,7 +107,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 /* ===== 앱 레이아웃 컨테이너 ===== */
@@ -108,12 +123,12 @@ input:focus, textarea:focus, select:focus {
 /* ===== 상단 네비게이션 & 헤더 ===== */
 .header-wrapper {
   background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(228, 232, 238, 0.8);
   border-radius: var(--radius-xl);
   padding: 18px 26px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px -2px rgba(124, 58, 237, 0.05), var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -130,40 +145,110 @@ input:focus, textarea:focus, select:focus {
 .studio-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
 .studio-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #EA580C, #F97316);
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #0D9488 0%, #0891B2 35%, #6366F1 75%, #7C3AED 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.28);
+  box-shadow: 
+    0 10px 22px -3px rgba(99, 102, 241, 0.38),
+    0 4px 10px -1px rgba(13, 148, 136, 0.28),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+
+/* 상단 글래스 광택 레이어 */
+.studio-icon-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  pointer-events: none;
+}
+
+/* 은은한 네온 펄스 백그라운드 */
+.studio-icon-box::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #14B8A6, #8B5CF6);
+  z-index: -1;
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.studio-icon-box:hover {
+  transform: translateY(-2.5px) scale(1.05) rotate(-2deg);
+  box-shadow: 
+    0 14px 28px -4px rgba(124, 58, 237, 0.45),
+    0 6px 14px rgba(13, 148, 136, 0.35),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.85);
+}
+
+.studio-icon-box:hover::after {
+  opacity: 0.6;
+}
+
+.studio-icon-box:active {
+  transform: translateY(0px) scale(0.97);
+  box-shadow: 
+    0 4px 12px rgba(124, 58, 237, 0.25),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modern-music-icon-svg {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.22));
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.studio-icon-box:hover .modern-music-icon-svg {
+  transform: scale(1.06);
 }
 
 .studio-title-area {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .studio-title {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--color-text-main);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1.25;
 }
 
 .studio-subtitle {
   font-size: 0.82rem;
   color: var(--color-text-muted);
   font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-top: 1px;
 }
 
 /* 우측 상단 액션 바 */
@@ -177,39 +262,53 @@ input:focus, textarea:focus, select:focus {
 .sync-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.82rem;
   font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.sync-badge.online {
-  background: #ECFDF5;
+  background: rgba(16, 185, 129, 0.08);
   color: #047857;
-  border: 1px solid #6EE7B7;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
+  user-select: none;
 }
 
-.sync-badge.local {
-  background: #FFFBEB;
-  color: #B45309;
-  border: 1px solid #FCD34D;
+.sync-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10B981;
+  position: relative;
+  display: inline-block;
 }
 
-.sync-badge.error {
-  background: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FCA5A5;
+.sync-pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid #10B981;
+  animation: pulseDot 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  opacity: 0.7;
 }
 
-.sync-badge.clickable {
-  cursor: pointer;
-}
-
-.sync-badge.clickable:hover {
-  transform: translateY(-1px);
-  filter: brightness(0.96);
+@keyframes pulseDot {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
 }
 
 /* 상단 에러 알림 배너 */
@@ -281,17 +380,17 @@ input:focus, textarea:focus, select:focus {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), #F97316);
+  background: linear-gradient(135deg, #14B8A6 0%, #8B5CF6 100%);
   color: white;
   border: none;
-  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #D946EF, #EA580C);
-  background: var(--color-primary-hover);
+  background: linear-gradient(135deg, #0D9488 0%, #7C3AED 100%);
   color: white;
-  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+  transform: translateY(-1px);
 }
 
 /* 연월 컨트롤러 바 */
@@ -328,7 +427,7 @@ input:focus, textarea:focus, select:focus {
   background: var(--color-primary-light);
   border-color: var(--color-primary);
   color: var(--color-primary);
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 .current-month-heading {
@@ -344,9 +443,10 @@ input:focus, textarea:focus, select:focus {
 
 .current-month-badge {
   font-size: 0.75rem;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  padding: 3px 8px;
+  background: linear-gradient(135deg, #CCFBF1 0%, #EDE9FE 100%);
+  color: #6D28D9;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  padding: 3px 9px;
   border-radius: 6px;
   font-weight: 700;
 }
@@ -366,14 +466,14 @@ input:focus, textarea:focus, select:focus {
   cursor: pointer;
 }
 
-/* ===== 상단 운영 안내문 배너 ===== */
+/* ===== 상단 운영 안내문 배너 (민트·보라 배경과 어우러지는 소프트 살구 코랄) ===== */
 .notice-card {
-  background: linear-gradient(135deg, #FFFFFF 0%, #FFFDF9 100%);
-  border: 1px solid #FED7AA;
-  border-left: 5px solid var(--color-primary);
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBF9 100%);
+  border: 1px solid var(--color-apricot-border);
+  border-left: 5px solid var(--color-apricot);
   border-radius: var(--radius-lg);
   padding: 18px 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 16px -2px rgba(232, 122, 93, 0.08), var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -382,7 +482,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .notice-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 6px 20px -2px rgba(232, 122, 93, 0.14);
   border-color: #FDBA74;
 }
 
@@ -396,7 +496,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-primary);
+  color: #D76547;
   font-weight: 700;
   font-size: 0.98rem;
 }
@@ -415,9 +515,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .notice-edit-btn:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background: var(--color-primary-subtle);
+  color: var(--color-apricot);
+  border-color: var(--color-apricot);
+  background: var(--color-apricot-light);
 }
 
 .notice-content {
@@ -432,11 +532,16 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   min-height: 110px;
   padding: 12px;
-  border: 1.5px solid var(--color-primary);
+  border: 1.5px solid var(--color-apricot);
   border-radius: var(--radius-sm);
   font-size: 0.92rem;
   line-height: 1.6;
   resize: vertical;
+}
+
+.notice-textarea:focus {
+  border-color: var(--color-apricot);
+  box-shadow: 0 0 0 3px rgba(232, 122, 93, 0.18);
 }
 
 .notice-edit-actions {
@@ -461,7 +566,7 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: #FAF8F5;
+  background: #F8FBFA;
   border-bottom: 1px solid var(--color-border);
   flex-wrap: wrap;
   gap: 12px;
@@ -516,7 +621,7 @@ input:focus, textarea:focus, select:focus {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #F8F6F2;
+  background: #F8FBFA;
   border-bottom: 2px solid var(--color-border);
   border-right: 1px solid var(--color-border-subtle);
   padding: 12px 8px;
@@ -532,7 +637,7 @@ input:focus, textarea:focus, select:focus {
   position: sticky;
   left: 0;
   z-index: 25;
-  background: #F3EFEA;
+  background: #F0F6F5;
   border-right: 1px solid var(--color-border);
 }
 
@@ -546,7 +651,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .timetable-table tbody tr:hover {
-  background-color: rgba(254, 243, 199, 0.12);
+  background-color: rgba(139, 92, 246, 0.04);
 }
 
 /* 시간 셀 (첫 번째 열) */
@@ -554,7 +659,7 @@ input:focus, textarea:focus, select:focus {
   position: sticky;
   left: 0;
   z-index: 10;
-  background: #FAF8F5;
+  background: #FAFDFD;
   border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border-subtle);
   padding: 8px 10px;
@@ -589,7 +694,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .slot-cell:hover {
-  background: #FEF9EE;
+  background: #F0FDFA;
 }
 
 .slot-cell:last-child {

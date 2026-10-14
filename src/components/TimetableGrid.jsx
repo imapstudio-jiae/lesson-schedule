@@ -36,7 +36,7 @@ export default function TimetableGrid({
         <div className="timetable-stats">
           <div className="stat-item">
             <Clock size={15} />
-            <span>운영 시간: <strong>06:00 ~ 20:00 (30분 단위)</strong></span>
+            <span>운영 시간: <strong>13:00 ~ 20:00 (30분 단위)</strong></span>
           </div>
           <div className="stat-item">
             <span>이번 달 배정 레슨: <span className="stat-count">{totalLessons}</span>건</span>

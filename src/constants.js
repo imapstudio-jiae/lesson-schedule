@@ -8,8 +8,8 @@ export const DAYS_OF_WEEK = [
   { key: 'sat', label: '토요일', short: '토' },
 ];
 
-// 오전 6시 ~ 오후 8시 (30분 단위 슬롯 생성)
-export function generateTimeSlots(startHour = 6, endHour = 20) {
+// 오후 1시(13:00) ~ 오후 8시(20:00) (30분 단위 슬롯 생성)
+export function generateTimeSlots(startHour = 13, endHour = 20) {
   const slots = [];
   for (let hour = startHour; hour <= endHour; hour++) {
     const hh = String(hour).padStart(2, '0');
@@ -21,7 +21,7 @@ export function generateTimeSlots(startHour = 6, endHour = 20) {
   return slots;
 }
 
-export const TIME_SLOTS = generateTimeSlots(6, 20);
+export const TIME_SLOTS = generateTimeSlots(13, 20);
 
 // 기본 레슨 유형 프리셋
 export const LESSON_TYPES = [
@@ -33,14 +33,15 @@ export const LESSON_TYPES = [
   { label: '보강 / 테스트', duration: '40분' },
 ];
 
-// 카드 및 레슨 뱃지 색상 팔레트 (따뜻하고 고급스러운 파스텔/오렌지 포인트)
+// 카드 및 레슨 뱃지 색상 팔레트 (연한 민트 & 라벤더 보라 테마와 어우러지는 파스텔 팔레트)
 export const COLOR_PALETTES = [
-  { id: 'orange', name: '웜 오렌지', bg: '#FFF7ED', border: '#FDBA74', text: '#C2410C', badge: '#EA580C' },
-  { id: 'peach', name: '소프트 코랄', bg: '#FFF1F2', border: '#FECDD3', text: '#BE123C', badge: '#E11D48' },
-  { id: 'amber', name: '골든 앰버', bg: '#FEFCE8', border: '#FDE047', text: '#A16207', badge: '#CA8A04' },
+  { id: 'orange', name: '소프트 살구', bg: '#FFF5F0', border: '#FED7C3', text: '#B84A28', badge: '#EA673E' },
+  { id: 'peach', name: '웜 코랄', bg: '#FFF1F2', border: '#FECDD3', text: '#BE123C', badge: '#E11D48' },
+  { id: 'mint', name: '클리어 민트', bg: '#F0FDFA', border: '#99F6E4', text: '#0F766E', badge: '#14B8A6' },
+  { id: 'lavender', name: '소프트 라벤더', bg: '#F5F3FF', border: '#DDD6FE', text: '#6D28D9', badge: '#8B5CF6' },
   { id: 'sage', name: '세이지 그린', bg: '#F0FDF4', border: '#BBF7D0', text: '#15803D', badge: '#16A34A' },
   { id: 'sky', name: '스카이 블루', bg: '#F0F9FF', border: '#BAE6FD', text: '#0369A1', badge: '#0284C7' },
-  { id: 'lavender', name: '소프트 라벤더', bg: '#FAF5FF', border: '#E9D5FF', text: '#7E22CE', badge: '#9333EA' },
+  { id: 'amber', name: '골든 허니', bg: '#FEFCE8', border: '#FDE047', text: '#A16207', badge: '#CA8A04' },
   { id: 'stone', name: '웜 그레이', bg: '#F5F5F4', border: '#D6D3D1', text: '#44403C', badge: '#78716C' },
 ];
 
@@ -92,17 +93,13 @@ export function getDefaultMemoCards() {
 
 // 기본 운영 안내문 텍스트
 export function getDefaultNotice(yearMonthStr) {
-  return `📢 ${yearMonthStr} 스튜디오 운영 안내사항
-• 레슨 시작 10분 전 스튜디오 입실 부탁드립니다.
-• 결석 및 일정 변경은 최소 24시간 전 원장님 또는 담당 강사님께 미리 연락해주세요.
-• 연습실은 레슨 당일 전후 30분 무료 개방되며, 추가 연습 희망 시 사전 예약 부탁드립니다.
-• 주차는 건물 지하 주차장 2시간 무료 지원됩니다 (데스크 차량번호 등록 필수).`;
+  return `${yearMonthStr} 스튜디오 운영 안내사항입니다.`;
 }
 
-// 2026년 10월 등 초기 샘플 레슨 데이터
+// 2026년 10월 등 초기 샘플 레슨 데이터 (13:00~20:00 범위 기준)
 export function getDefaultLessons() {
   return {
-    'mon-09:00': {
+    'mon-13:00': {
       id: 'l-1',
       studentName: '최수연',
       lessonType: '40분 정규 레슨',
@@ -110,9 +107,9 @@ export function getDefaultLessons() {
       color: 'orange',
       memo: '쇼팽 녹턴 9-2 도입부 루바토 연습',
       day: 'mon',
-      time: '09:00'
+      time: '13:00'
     },
-    'mon-10:00': {
+    'mon-14:30': {
       id: 'l-2',
       studentName: '박준혁',
       lessonType: '성인그룹 (40분)',
@@ -120,9 +117,9 @@ export function getDefaultLessons() {
       color: 'sage',
       memo: '재즈 코드 보이싱 II-V-I 패턴',
       day: 'mon',
-      time: '10:00'
+      time: '14:30'
     },
-    'tue-11:00': {
+    'tue-15:00': {
       id: 'l-3',
       studentName: '이지은',
       lessonType: '40분 정규 레슨',
@@ -130,7 +127,7 @@ export function getDefaultLessons() {
       color: 'sky',
       memo: '하농 39번 스케일 및 체르니 30번',
       day: 'tue',
-      time: '11:00'
+      time: '15:00'
     },
     'wed-14:00': {
       id: 'l-4',
@@ -142,7 +139,7 @@ export function getDefaultLessons() {
       day: 'wed',
       time: '14:00'
     },
-    'wed-15:30': {
+    'wed-16:30': {
       id: 'l-5',
       studentName: '한서아',
       lessonType: '30분 기초/원포인트',
@@ -150,9 +147,9 @@ export function getDefaultLessons() {
       color: 'peach',
       memo: '바이엘 4권 양손 아티큘레이션',
       day: 'wed',
-      time: '15:30'
+      time: '16:30'
     },
-    'thu-10:30': {
+    'thu-17:00': {
       id: 'l-6',
       studentName: '강태우',
       lessonType: '성인그룹 (40분)',
@@ -160,7 +157,7 @@ export function getDefaultLessons() {
       color: 'amber',
       memo: '영화 OST 연주곡 (인터스텔라 테마)',
       day: 'thu',
-      time: '10:30'
+      time: '17:00'
     },
     'fri-13:00': {
       id: 'l-7',
@@ -172,7 +169,7 @@ export function getDefaultLessons() {
       day: 'fri',
       time: '13:00'
     },
-    'sat-10:00': {
+    'sat-13:00': {
       id: 'l-8',
       studentName: '임서진',
       lessonType: '40분 정규 레슨',
@@ -180,9 +177,9 @@ export function getDefaultLessons() {
       color: 'sky',
       memo: '듀오 앙상블 파트 리허설',
       day: 'sat',
-      time: '10:00'
+      time: '13:00'
     },
-    'sat-11:30': {
+    'sat-14:30': {
       id: 'l-9',
       studentName: '밴드 앙상블팀',
       lessonType: '성인그룹 (40분)',
@@ -190,7 +187,7 @@ export function getDefaultLessons() {
       color: 'sage',
       memo: '합주실 A룸 단체 세션',
       day: 'sat',
-      time: '11:30'
+      time: '14:30'
     }
   };
 }

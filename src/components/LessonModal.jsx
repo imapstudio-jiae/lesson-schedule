@@ -5,21 +5,22 @@ import { LESSON_TYPES, COLOR_PALETTES } from '../constants';
 export default function LessonModal({
   isOpen,
   onClose,
-  cellInfo, // { dayKey, dayLabel, time, lesson }
+  cellInfo, // { slotKey, dayKey, dayLabel, time, lesson }
   onSaveLesson,
   onDeleteLesson
 }) {
-  if (!isOpen || !cellInfo) return null;
-
-  const existingLesson = cellInfo.lesson;
-
+  // 모든 훅은 조건부 return 이전에 선언해야 함
   const [studentName, setStudentName] = useState('');
   const [lessonType, setLessonType] = useState('40분 정규 레슨');
   const [customType, setCustomType] = useState('');
   const [color, setColor] = useState('orange');
   const [memo, setMemo] = useState('');
 
+  const existingLesson = cellInfo?.lesson ?? null;
+
   useEffect(() => {
+    if (!isOpen || !cellInfo) return;
+
     if (existingLesson) {
       setStudentName(existingLesson.studentName || '');
       setLessonType(existingLesson.lessonType || '40분 정규 레슨');
@@ -33,7 +34,10 @@ export default function LessonModal({
       setMemo('');
       setCustomType('');
     }
-  }, [existingLesson, cellInfo]);
+  }, [isOpen, cellInfo, existingLesson]);
+
+  // 모달이 닫혀 있거나 cellInfo 없으면 렌더링 안함
+  if (!isOpen || !cellInfo) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,9 +62,20 @@ export default function LessonModal({
     onClose();
   };
 
-  const handleDelete = () => {
-    if (confirm(`'${existingLesson.studentName}' 학생의 레슨을 삭제하시겠습니까?`)) {
-      onDeleteLesson(cellInfo.slotKey);
+  const handleDelete = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!existingLesson) return;
+
+    const student = existingLesson.studentName || '선택한';
+    const confirmed = window.confirm(
+      `'${student}' 학생의 레슨을 삭제하시겠습니까?\n\n삭제 후에는 복구할 수 없습니다.`
+    );
+    if (confirmed) {
+      const targetSlotKey = cellInfo.slotKey || `${cellInfo.dayKey}-${cellInfo.time}`;
+      onDeleteLesson(targetSlotKey, existingLesson.id);
       onClose();
     }
   };

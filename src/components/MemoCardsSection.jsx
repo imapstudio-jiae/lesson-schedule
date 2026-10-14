@@ -104,7 +104,7 @@ export default function MemoCardsSection({
                       onClick={() => handleSaveTitle(card.id)}
                       title="저장"
                     >
-                      <Check size={14} color="#EA580C" />
+                      <Check size={14} color="var(--color-primary)" />
                     </button>
                     <button 
                       className="icon-btn" 

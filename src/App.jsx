@@ -4,10 +4,8 @@ import NoticeBanner from './components/NoticeBanner';
 import TimetableGrid from './components/TimetableGrid';
 import LessonModal from './components/LessonModal';
 import MemoCardsSection from './components/MemoCardsSection';
-import FirebaseConfigModal from './components/FirebaseConfigModal';
 
 import { 
-  getDb, 
   getStoredStudioId, 
   subscribeToMonthData, 
   saveMonthDataToFirestore 
@@ -19,10 +17,10 @@ import {
   getDefaultLessons 
 } from './constants';
 
-import { AlertTriangle, X, ShieldAlert } from 'lucide-react';
+import { realtimeSync } from './realtimeSync';
 
 export default function App() {
-  // 현재 날짜 기준 (2026년 10월 등)
+  // 현재 날짜 기준
   const initialDate = new Date();
   const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth() + 1);
@@ -30,7 +28,16 @@ export default function App() {
   // 스튜디오 기본 정보
   const [studioId, setStudioId] = useState(getStoredStudioId());
   const [studioTitle, setStudioTitle] = useState(() => {
-    return localStorage.getItem('music_studio_title') || '라르고 음악 스튜디오';
+    const saved = localStorage.getItem('music_studio_title');
+    if (!saved || saved.includes('스튜디오') || saved.includes('시간표') || saved === '라르고 음악 스튜디오' || saved === 'IMAP 음악 스튜디오') {
+      try {
+        localStorage.setItem('music_studio_title', 'IMAP Studio');
+      } catch (e) {
+        console.warn('LocalStorage access error:', e);
+      }
+      return 'IMAP Studio';
+    }
+    return saved;
   });
 
   // 현재 월 포맷 (YYYY-MM)
@@ -42,41 +49,11 @@ export default function App() {
   const [lessons, setLessons] = useState({});
   const [memoCards, setMemoCards] = useState([]);
   
-  // 상태 관리: Firebase 연결 여부, 에러 객체, 모달 상태
-  const [syncStatus, setSyncStatus] = useState('local'); // 'online' | 'local' | 'error'
-  const [firestoreError, setFirestoreError] = useState(null); // { title, description, raw, type }
-  const [isFirebaseModalOpen, setIsFirebaseModalOpen] = useState(false);
+  // 모달 상태 (레슨 등록/수정 모달만 유지)
   const [lessonModalCell, setLessonModalCell] = useState(null);
 
   // 무한 업데이트 루프 방지용 플래그
   const isRemoteUpdating = useRef(false);
-
-  // BroadcastChannel (로컬 다중 탭 실시간 동기화)
-  const broadcastChannelRef = useRef(null);
-
-  useEffect(() => {
-    try {
-      broadcastChannelRef.current = new BroadcastChannel('music_studio_channel');
-      broadcastChannelRef.current.onmessage = (event) => {
-        const { type, payloadKey, data } = event.data || {};
-        if (type === 'DATA_UPDATE' && payloadKey === yearMonthKey) {
-          isRemoteUpdating.current = true;
-          setNotice(data.notice ?? '');
-          setLessons(data.lessons ?? {});
-          setMemoCards(data.memoCards ?? []);
-          setTimeout(() => { isRemoteUpdating.current = false; }, 100);
-        }
-      };
-    } catch (e) {
-      console.warn('BroadcastChannel not supported', e);
-    }
-
-    return () => {
-      if (broadcastChannelRef.current) {
-        broadcastChannelRef.current.close();
-      }
-    };
-  }, [yearMonthKey]);
 
   // 로컬 스토리지 키 생성
   const getStorageKey = useCallback((ym) => {
@@ -89,8 +66,12 @@ export default function App() {
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
+        let currentNotice = parsed.notice ?? getDefaultNotice(ymLabel);
+        if (typeof currentNotice === 'string' && currentNotice.includes('•')) {
+          currentNotice = getDefaultNotice(ymLabel);
+        }
         return {
-          notice: parsed.notice ?? getDefaultNotice(ymLabel),
+          notice: currentNotice,
           lessons: parsed.lessons ?? {},
           memoCards: parsed.memoCards ?? getDefaultMemoCards()
         };
@@ -107,7 +88,7 @@ export default function App() {
     };
   }, [getStorageKey]);
 
-  // 데이터 변경 시 로컬 저장 + Firestore 저장 + Broadcast 전송
+  // 데이터 변경 시 로컬 저장 + 실시간 클라우드 브로드캐스트 + Firestore 백엔드 자동 저장
   const persistMonthData = useCallback(async (newNotice, newLessons, newCards) => {
     const dataToSave = {
       notice: newNotice,
@@ -116,83 +97,61 @@ export default function App() {
       updatedAt: Date.now()
     };
 
-    // 1. 로컬스토리지 백업
+    // 1. 로컬스토리지 즉시 영구 저장
     localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(dataToSave));
 
-    // 2. 다른 탭 브로드캐스트
-    if (broadcastChannelRef.current) {
-      broadcastChannelRef.current.postMessage({
-        type: 'DATA_UPDATE',
-        payloadKey: yearMonthKey,
-        data: dataToSave
-      });
-    }
+    // 2. 다른 사용자 및 탭으로 실시간 클라우드 자동 전파 (별도 설정 전혀 불필요)
+    realtimeSync.broadcastUpdate(yearMonthKey, dataToSave);
 
-    // 3. Firestore 실시간 전송
-    const db = getDb();
-    if (db) {
-      try {
-        await saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave);
-        setFirestoreError(null);
-        setSyncStatus('online');
-      } catch (error) {
-        console.error('[Firestore Save Error Caught]:', error);
-        setFirestoreError(error);
-        setSyncStatus('error');
-      }
-    }
+    // 3. Firestore 백엔드에도 백그라운드 자동 저장 시도
+    saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave).catch(() => {});
   }, [yearMonthKey, studioId, getStorageKey]);
 
-  // 월이 변경되거나 Firebase 설정 시 Firestore 실시간 구독
+  // 월 변경 및 실시간 동기화 엔진 리스너 등록
   useEffect(() => {
-    const db = getDb();
-    if (!db) {
-      setSyncStatus('local');
-      setFirestoreError(null);
-    }
-
-    // 초기 로컬 데이터 즉시 로드
+    // 1. 로컬 캐시 즉시 렌더링
     const initial = loadLocalMonthData(yearMonthKey, yearMonthLabel);
     setNotice(initial.notice);
     setLessons(initial.lessons);
     setMemoCards(initial.memoCards);
 
-    // Firestore 실시간 구독 설정
-    let unsubscribe = null;
-    if (db) {
-      unsubscribe = subscribeToMonthData(
+    // 2. 실시간 클라우드 & 로컬 동기화 수신 구독
+    const unsubscribeSync = realtimeSync.subscribe(({ payloadKey, data }) => {
+      if (payloadKey === yearMonthKey && data) {
+        isRemoteUpdating.current = true;
+        setNotice(data.notice ?? '');
+        setLessons(data.lessons ?? {});
+        setMemoCards(data.memoCards ?? []);
+        localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(data));
+        setTimeout(() => { isRemoteUpdating.current = false; }, 100);
+      }
+    });
+
+    // 3. Firestore 실시간 리스너 자동 연결
+    let unsubscribeFirestore = null;
+    try {
+      unsubscribeFirestore = subscribeToMonthData(
         studioId,
         yearMonthKey,
         (remoteData) => {
-          // 성공 수신 시 에러 초기화 및 online 상태 유지
-          setFirestoreError(null);
-          setSyncStatus('online');
-
           if (remoteData) {
             isRemoteUpdating.current = true;
             setNotice(remoteData.notice ?? '');
             setLessons(remoteData.lessons ?? {});
             setMemoCards(remoteData.memoCards ?? []);
-            // 로컬에도 최신 캐시 저장
             localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(remoteData));
             setTimeout(() => { isRemoteUpdating.current = false; }, 100);
-          } else {
-            // 문서가 아직 없으면 현재 초기 데이터 업로드 시도
-            persistMonthData(initial.notice, initial.lessons, initial.memoCards);
           }
         },
-        (error) => {
-          console.error('[Firestore Snapshot Listener Error Caught]:', error);
-          setFirestoreError(error);
-          setSyncStatus('error');
-        }
+        () => {}
       );
-    }
+    } catch (e) {}
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubscribeSync) unsubscribeSync();
+      if (unsubscribeFirestore) unsubscribeFirestore();
     };
-  }, [yearMonthKey, studioId, loadLocalMonthData, yearMonthLabel, getStorageKey, persistMonthData]);
+  }, [yearMonthKey, studioId, loadLocalMonthData, yearMonthLabel, getStorageKey]);
 
   // 월 이동 핸들러
   const handlePrevMonth = () => {
@@ -213,15 +172,15 @@ export default function App() {
     }
   };
 
-  const handleSelectYearMonth = (y, m) => {
-    setCurrentYear(y);
-    setCurrentMonth(m);
+  const handleSelectYearMonth = (year, month) => {
+    setCurrentYear(year);
+    setCurrentMonth(month);
   };
 
   const handleResetToCurrentMonth = () => {
-    const d = new Date();
-    setCurrentYear(d.getFullYear());
-    setCurrentMonth(d.getMonth() + 1);
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonth(now.getMonth() + 1);
   };
 
   // 스튜디오 이름 변경
@@ -230,31 +189,45 @@ export default function App() {
     localStorage.setItem('music_studio_title', title);
   };
 
-  // 1. 공지사항 저장
-  const handleSaveNotice = (newNotice) => {
-    setNotice(newNotice);
-    persistMonthData(newNotice, lessons, memoCards);
+  // 공지사항 변경
+  const handleSaveNotice = (text) => {
+    setNotice(text);
+    persistMonthData(text, lessons, memoCards);
   };
 
-  // 2. 레슨 등록 / 수정
-  const handleSaveLesson = (slotKey, lessonData) => {
-    const updatedLessons = {
-      ...lessons,
-      [slotKey]: lessonData
-    };
-    setLessons(updatedLessons);
-    persistMonthData(notice, updatedLessons, memoCards);
+  // 레슨 추가/수정
+  const handleSaveLesson = (cellKey, lessonData) => {
+    setLessons((prevLessons) => {
+      const updated = {
+        ...prevLessons,
+        [cellKey]: lessonData
+      };
+      persistMonthData(notice, updated, memoCards);
+      return updated;
+    });
   };
 
-  // 3. 레슨 삭제
-  const handleDeleteLesson = (slotKey) => {
-    const updatedLessons = { ...lessons };
-    delete updatedLessons[slotKey];
-    setLessons(updatedLessons);
-    persistMonthData(notice, updatedLessons, memoCards);
+  // 레슨 삭제 (슬롯 키 및 레슨 ID 양방향 검사로 완벽 삭제)
+  const handleDeleteLesson = (cellKey, lessonId) => {
+    setLessons((prevLessons) => {
+      const updated = { ...prevLessons };
+      if (cellKey && updated[cellKey]) {
+        delete updated[cellKey];
+      }
+      if (lessonId) {
+        Object.keys(updated).forEach((key) => {
+          if (updated[key]?.id === lessonId) {
+            delete updated[key];
+          }
+        });
+      }
+      // 최신 상태를 로컬스토리지, 실시간 채널, Firestore에 즉시 영구 저장
+      persistMonthData(notice, updated, memoCards);
+      return updated;
+    });
   };
 
-  // 4. 하단 메모 카드 핸들러들
+  // 메모 카드 추가
   const handleAddMemoCard = () => {
     const newCard = {
       id: `card-${Date.now()}`,
@@ -269,33 +242,34 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 삭제
   const handleDeleteMemoCard = (cardId) => {
     const updated = memoCards.filter(c => c.id !== cardId);
     setMemoCards(updated);
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 제목 수정
   const handleUpdateCardTitle = (cardId, newTitle) => {
     const updated = memoCards.map(c => c.id === cardId ? { ...c, title: newTitle } : c);
     setMemoCards(updated);
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 색상 변경
   const handleUpdateCardColor = (cardId, newColor) => {
     const updated = memoCards.map(c => c.id === cardId ? { ...c, color: newColor } : c);
     setMemoCards(updated);
     persistMonthData(notice, lessons, updated);
   };
 
-  const handleAddItemToCard = (cardId, itemText) => {
+  // 메모 카드 항목 추가
+  const handleAddItemToCard = (cardId, text) => {
     const updated = memoCards.map(c => {
       if (c.id === cardId) {
         return {
           ...c,
-          items: [
-            ...(c.items || []),
-            { id: `item-${Date.now()}`, text: itemText, checked: false }
-          ]
+          items: [...(c.items || []), { id: `item-${Date.now()}`, text, checked: false }]
         };
       }
       return c;
@@ -304,14 +278,13 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 항목 체크박스 토글
   const handleToggleItemCheck = (cardId, itemId) => {
     const updated = memoCards.map(c => {
       if (c.id === cardId) {
         return {
           ...c,
-          items: (c.items || []).map(item => 
-            item.id === itemId ? { ...item, checked: !item.checked } : item
-          )
+          items: (c.items || []).map(item => item.id === itemId ? { ...item, checked: !item.checked } : item)
         };
       }
       return c;
@@ -320,6 +293,7 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 항목 삭제
   const handleDeleteItemFromCard = (cardId, itemId) => {
     const updated = memoCards.map(c => {
       if (c.id === cardId) {
@@ -334,13 +308,12 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
-  // 샘플 데이터 불러오기
+  // 샘플 데이터 복원
   const handleLoadSampleData = () => {
     if (confirm('현재 월에 예시 레슨 일정과 4개 기본 메모 카드를 불러오시겠습니까?')) {
       const sampleLessons = getDefaultLessons();
       const sampleCards = getDefaultMemoCards();
       const sampleNotice = getDefaultNotice(yearMonthLabel);
-
       setNotice(sampleNotice);
       setLessons(sampleLessons);
       setMemoCards(sampleCards);
@@ -350,7 +323,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* 1. 상단 헤더 & 연월 네비게이터 */}
+      {/* 1. 상단 헤더 & 연월 네비게이터 (설정 모달 없이 자동 실시간 동기화 상태 표시) */}
       <Header
         year={currentYear}
         month={currentMonth}
@@ -360,46 +333,10 @@ export default function App() {
         onResetToCurrentMonth={handleResetToCurrentMonth}
         studioTitle={studioTitle}
         onUpdateStudioTitle={handleUpdateStudioTitle}
-        syncStatus={syncStatus}
-        onOpenFirebaseModal={() => setIsFirebaseModalOpen(true)}
         onLoadSampleData={handleLoadSampleData}
       />
 
-      {/* 1-1. Firestore 연결/권한 에러 발생 시 나타나는 알림 배너 (요청 2) */}
-      {firestoreError && (
-        <div className="error-alert-banner" role="alert">
-          <div className="error-alert-content">
-            <ShieldAlert size={24} color="#DC2626" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong>🚨 {firestoreError.title}</strong>
-              <p>{firestoreError.description}</p>
-              {firestoreError.raw && (
-                <div style={{ fontSize: '0.76rem', color: '#B91C1C', marginTop: '4px', fontFamily: 'monospace' }}>
-                  에러 로그: {firestoreError.raw}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="error-alert-actions">
-            <button 
-              className="btn-pill" 
-              onClick={() => setIsFirebaseModalOpen(true)}
-              style={{ background: '#DC2626', color: 'white', borderColor: '#DC2626' }}
-            >
-              보안 규칙 & 설정 열기
-            </button>
-            <button 
-              className="icon-btn" 
-              onClick={() => setFirestoreError(null)}
-              title="알림 닫기"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 2. 상단 운영 안내문 (수정 가능, 실시간 공유) */}
+      {/* 2. 상단 운영 안내문 (수정 가능, 실시간 자동 공유) */}
       <NoticeBanner
         year={currentYear}
         month={currentMonth}
@@ -415,7 +352,7 @@ export default function App() {
         month={currentMonth}
       />
 
-      {/* 4. 하단 동적 메모 카드 영역 (완전 편집 가능, 기본 4개 카드 제공) */}
+      {/* 4. 하단 동적 메모 카드 영역 (완전 편집 가능, 실시간 자동 공유) */}
       <MemoCardsSection
         memoCards={memoCards}
         onAddCard={handleAddMemoCard}
@@ -427,24 +364,13 @@ export default function App() {
         onDeleteItemFromCard={handleDeleteItemFromCard}
       />
 
-      {/* 레슨 등록 및 수정 모달 */}
+      {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
       <LessonModal
         isOpen={Boolean(lessonModalCell)}
         onClose={() => setLessonModalCell(null)}
         cellInfo={lessonModalCell}
         onSaveLesson={handleSaveLesson}
         onDeleteLesson={handleDeleteLesson}
-      />
-
-      {/* Firebase 연동 및 보안 규칙 설정 모달 */}
-      <FirebaseConfigModal
-        isOpen={isFirebaseModalOpen}
-        onClose={() => setIsFirebaseModalOpen(false)}
-        onConfigSaved={() => {
-          setStudioId(getStoredStudioId());
-          const db = getDb();
-          setSyncStatus(db ? 'online' : 'local');
-        }}
       />
     </div>
   );
