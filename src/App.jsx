@@ -227,6 +227,43 @@ export default function App() {
     });
   };
 
+  // 레슨 드래그 앤 드롭 이동 핸들러 (빈 슬롯 이동 및 다른 레슨과의 맞교환 지원)
+  const handleMoveLesson = (sourceSlotKey, targetSlotKey, targetDayKey, targetTime) => {
+    if (!sourceSlotKey || !targetSlotKey || sourceSlotKey === targetSlotKey) return;
+
+    setLessons((prevLessons) => {
+      const sourceLesson = prevLessons[sourceSlotKey];
+      if (!sourceLesson) return prevLessons;
+
+      const updated = { ...prevLessons };
+      const targetExistingLesson = updated[targetSlotKey];
+
+      // 타겟 슬롯에 소스 레슨의 요일/시간을 갱신하여 배치
+      updated[targetSlotKey] = {
+        ...sourceLesson,
+        day: targetDayKey,
+        time: targetTime
+      };
+
+      // 타겟 슬롯에 이미 레슨이 있던 경우: 두 레슨의 위치를 맞교환(Swap)
+      if (targetExistingLesson) {
+        const [sourceDayKey, sourceTime] = sourceSlotKey.split('-');
+        updated[sourceSlotKey] = {
+          ...targetExistingLesson,
+          day: sourceDayKey,
+          time: sourceTime
+        };
+      } else {
+        // 빈 슬롯으로 이동한 경우: 기존 슬롯 데이터 제거
+        delete updated[sourceSlotKey];
+      }
+
+      // 로컬스토리지, 실시간 채널, Firestore에 최신 상태 즉각 영구 저장
+      persistMonthData(notice, updated, memoCards);
+      return updated;
+    });
+  };
+
   // 메모 카드 추가
   const handleAddMemoCard = () => {
     const newCard = {
@@ -344,10 +381,11 @@ export default function App() {
         onSaveNotice={handleSaveNotice}
       />
 
-      {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 06:00~20:00 30분 슬롯) */}
+      {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 13:00~20:00 30분 슬롯 및 드래그앤드롭 이동) */}
       <TimetableGrid
         lessons={lessons}
         onSelectCell={(cellInfo) => setLessonModalCell(cellInfo)}
+        onMoveLesson={handleMoveLesson}
         year={currentYear}
         month={currentMonth}
       />

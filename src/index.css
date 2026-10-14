@@ -717,7 +717,7 @@ input:focus, textarea:focus, select:focus {
   opacity: 1;
 }
 
-/* 레슨 카드 디자인 */
+/* 레슨 카드 디자인 및 드래그 앤 드롭 */
 .lesson-card {
   width: 100%;
   height: 100%;
@@ -730,14 +730,93 @@ input:focus, textarea:focus, select:focus {
   gap: 3px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   border-left: 3.5px solid transparent;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   overflow: hidden;
   text-align: left;
+  cursor: grab;
+  user-select: none;
+}
+
+.lesson-card:active {
+  cursor: grabbing;
 }
 
 .lesson-card:hover {
   transform: translateY(-1.5px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 드래그 중인 카드 상태 */
+.lesson-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.96);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  filter: grayscale(0.2);
+}
+
+/* 카드 내 그립 핸들 */
+.card-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+  cursor: grab;
+}
+
+.lesson-card:hover .card-drag-handle {
+  opacity: 0.9;
+  color: var(--color-primary);
+}
+
+/* 드롭 타겟 셀 하이라이트 */
+.slot-cell.slot-cell-drop-target {
+  background-color: rgba(99, 102, 241, 0.14) !important;
+  outline: 2.5px dashed var(--color-primary) !important;
+  outline-offset: -3px;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 14px rgba(99, 102, 241, 0.18);
+  animation: pulse-drop-target 1s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-drop-target {
+  from {
+    background-color: rgba(99, 102, 241, 0.10);
+  }
+  to {
+    background-color: rgba(99, 102, 241, 0.22);
+  }
+}
+
+.slot-cell.slot-cell-drop-target .cell-empty-placeholder {
+  opacity: 1 !important;
+  color: var(--color-primary) !important;
+  transform: scale(1.25);
+  animation: bounce-placeholder 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes bounce-placeholder {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1.35);
+  }
+}
+
+/* 상단 드래그 힌트 뱃지 */
+.drag-hint-badge {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .lesson-card-header {
