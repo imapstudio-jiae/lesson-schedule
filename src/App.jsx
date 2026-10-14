@@ -74,7 +74,7 @@ export default function App() {
   
   // 모달 상태 (레슨 등록/수정 모달 및 메모 세부 모달)
   const [lessonModalCell, setLessonModalCell] = useState(null);
-  const [selectedMemoCard, setSelectedMemoCard] = useState(null);
+  const [selectedMemoDetail, setSelectedMemoDetail] = useState(null); // { card, item }
 
   // 무한 업데이트 루프 방지용 플래그
   const isRemoteUpdating = useRef(false);
@@ -448,17 +448,37 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
-  // 메모 카드 세부 내용 저장 및 날짜별 이력 누적
-  const handleSaveCardDetail = (cardId, detailNote, newHistoryItem) => {
+  // 메모 카드 또는 특정 항목의 세부 내용 저장 및 날짜별 이력 누적
+  const handleSaveCardDetail = (cardId, itemId, detailNote, newHistoryItem) => {
     setMemoCards((prevCards) => {
       const updated = prevCards.map((c) => {
         if (c.id === cardId) {
-          const prevHistory = c.history || [];
-          return {
-            ...c,
-            detailNote,
-            history: [newHistoryItem, ...prevHistory]
-          };
+          if (itemId) {
+            // 특정 항목(item)에 세부 메모 및 이력 누적 저장
+            const updatedItems = (c.items || []).map((it) => {
+              if (it.id === itemId) {
+                const prevHist = it.history || [];
+                return {
+                  ...it,
+                  detailNote,
+                  history: [newHistoryItem, ...prevHist]
+                };
+              }
+              return it;
+            });
+            return {
+              ...c,
+              items: updatedItems
+            };
+          } else {
+            // 카드 전체 레벨 세부 메모 및 이력 누적 저장
+            const prevHistory = c.history || [];
+            return {
+              ...c,
+              detailNote,
+              history: [newHistoryItem, ...prevHistory]
+            };
+          }
         }
         return c;
       });
@@ -467,16 +487,28 @@ export default function App() {
     });
   };
 
-  // 메모 카드 특정 이력 항목 삭제
-  const handleDeleteCardHistory = (cardId, historyId) => {
+  // 메모 카드 또는 특정 항목의 이력 항목 삭제
+  const handleDeleteCardHistory = (cardId, itemId, historyId) => {
     setMemoCards((prevCards) => {
       const updated = prevCards.map((c) => {
         if (c.id === cardId) {
-          const prevHistory = c.history || [];
-          return {
-            ...c,
-            history: prevHistory.filter((h) => h.id !== historyId)
-          };
+          if (itemId) {
+            const updatedItems = (c.items || []).map((it) => {
+              if (it.id === itemId) {
+                return {
+                  ...it,
+                  history: (it.history || []).filter((h) => h.id !== historyId)
+                };
+              }
+              return it;
+            });
+            return { ...c, items: updatedItems };
+          } else {
+            return {
+              ...c,
+              history: (c.history || []).filter((h) => h.id !== historyId)
+            };
+          }
         }
         return c;
       });
@@ -540,7 +572,7 @@ export default function App() {
         onAddItemToCard={handleAddItemToCard}
         onToggleItemCheck={handleToggleItemCheck}
         onDeleteItemFromCard={handleDeleteItemFromCard}
-        onOpenDetailModal={(card) => setSelectedMemoCard(card)}
+        onOpenDetailModal={(card, item = null) => setSelectedMemoDetail({ card, item })}
       />
 
       {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
@@ -554,14 +586,25 @@ export default function App() {
         onDeleteStudentHistory={handleDeleteStudentHistory}
       />
 
-      {/* 메모 카드 세부 내용 & 날짜별 이력 관리 모달 */}
-      <MemoDetailModal
-        isOpen={Boolean(selectedMemoCard)}
-        onClose={() => setSelectedMemoCard(null)}
-        card={selectedMemoCard ? memoCards.find(c => c.id === selectedMemoCard.id) || selectedMemoCard : null}
-        onSaveCardDetail={handleSaveCardDetail}
-        onDeleteCardHistory={handleDeleteCardHistory}
-      />
+      {/* 메모 카드 / 항목 세부 내용 & 날짜별 이력 관리 모달 */}
+      {(() => {
+        if (!selectedMemoDetail) return null;
+        const currentCard = memoCards.find(c => c.id === selectedMemoDetail.card?.id) || selectedMemoDetail.card;
+        const currentItem = selectedMemoDetail.item 
+          ? (currentCard?.items || []).find(it => it.id === selectedMemoDetail.item.id) || selectedMemoDetail.item
+          : null;
+
+        return (
+          <MemoDetailModal
+            isOpen={Boolean(selectedMemoDetail)}
+            onClose={() => setSelectedMemoDetail(null)}
+            card={currentCard}
+            activeItem={currentItem}
+            onSaveCardDetail={handleSaveCardDetail}
+            onDeleteCardHistory={handleDeleteCardHistory}
+          />
+        );
+      })()}
     </div>
   );
 }

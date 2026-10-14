@@ -8,7 +8,9 @@ import {
   FileText, 
   History, 
   Bookmark, 
-  Clock 
+  Clock,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { COLOR_PALETTES } from '../constants';
 
@@ -16,22 +18,26 @@ export default function MemoDetailModal({
   isOpen,
   onClose,
   card,
+  activeItem = null,
   onSaveCardDetail,
   onDeleteCardHistory
 }) {
   const [detailNote, setDetailNote] = useState('');
-  const [cardTitle, setCardTitle] = useState('');
+
+  // activeItem이 있으면 activeItem 기준, 없으면 card 기준
+  const targetNote = activeItem ? (activeItem.detailNote || '') : (card?.detailNote || '');
+  const historyList = activeItem ? (activeItem.history || []) : (card?.history || []);
 
   useEffect(() => {
     if (!isOpen || !card) return;
-    setDetailNote(card.detailNote || '');
-    setCardTitle(card.title || '운영 메모');
-  }, [isOpen, card]);
+    setDetailNote(targetNote);
+  }, [isOpen, card, activeItem]);
 
   if (!isOpen || !card) return null;
 
   const theme = COLOR_PALETTES.find(c => c.id === card.color) || COLOR_PALETTES[0];
-  const historyList = card.history || [];
+  const titleText = activeItem ? activeItem.text : card.title;
+  const subCategoryText = activeItem ? `${card.title} 항목` : '운영 메모 카드';
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -51,7 +57,7 @@ export default function MemoDetailModal({
       note: trimmedNote
     };
 
-    onSaveCardDetail(card.id, trimmedNote, newHistoryItem);
+    onSaveCardDetail(card.id, activeItem?.id || null, trimmedNote, newHistoryItem);
     onClose();
   };
 
@@ -70,26 +76,32 @@ export default function MemoDetailModal({
       <div className="modal-card memo-detail-modal" onClick={(e) => e.stopPropagation()}>
         {/* 모달 상단 헤더 */}
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
             <span 
               style={{ 
                 display: 'inline-block', 
                 width: '12px', 
                 height: '12px', 
                 borderRadius: '50%', 
-                backgroundColor: theme.badge 
+                backgroundColor: theme.badge,
+                flexShrink: 0
               }} 
             />
-            <h3 className="modal-title" style={{ fontSize: '1.15rem' }}>
-              {card.title} - 세부 메모 & 진행 상황
-            </h3>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>
+                {subCategoryText}
+              </div>
+              <h3 className="modal-title" style={{ fontSize: '1.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {titleText}
+              </h3>
+            </div>
           </div>
           <button className="icon-btn" onClick={onClose} title="닫기">
             <X size={18} />
           </button>
         </div>
 
-        {/* 안내 뱃지 */}
+        {/* 상단 안내 배너 */}
         <div style={{ 
           background: theme.bg, 
           borderColor: theme.border, 
@@ -104,7 +116,11 @@ export default function MemoDetailModal({
           gap: '8px'
         }}>
           <Bookmark size={16} />
-          <span>해당 카드의 세부 진행 사항을 작성하고 저장하면, 날짜별 이력으로 자동 누적됩니다.</span>
+          <span>
+            {activeItem 
+              ? `'${activeItem.text}' 항목의 세부 진행 메모를 작성하고 저장하면 날짜별 이력으로 자동 누적됩니다.`
+              : '해당 카드의 세부 진행 사항을 작성하고 저장하면, 날짜별 이력으로 자동 누적됩니다.'}
+          </span>
         </div>
 
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -113,17 +129,17 @@ export default function MemoDetailModal({
             <label className="modal-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FileText size={15} color="var(--color-primary)" />
-                <span style={{ fontWeight: '600' }}>세부 내용 및 진행 상황 메모 *</span>
+                <span style={{ fontWeight: '600' }}>세부 메모 및 진행 상황 기록 *</span>
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                저장 시 작성 일시와 함께 이력에 기록
+                저장 시 작성 일시와 함께 이력에 누적
               </span>
             </label>
             <textarea
               className="memo-detail-textarea"
               value={detailNote}
               onChange={(e) => setDetailNote(e.target.value)}
-              placeholder="예: 10월 조율사 방문 일정 조율 완료, 연습실 냉난방기 필터 교체 건 진행 중 등"
+              placeholder="예: Love Story 도입부 페달링 릴리즈 점검, 진행 상황 및 관련 세부 메모 입력..."
               rows={4}
               autoFocus
               required
@@ -168,7 +184,7 @@ export default function MemoDetailModal({
                               className="btn-history-delete"
                               onClick={() => {
                                 if (confirm('이 메모 기록을 삭제하시겠습니까?')) {
-                                  onDeleteCardHistory(card.id, item.id);
+                                  onDeleteCardHistory(card.id, activeItem?.id || null, item.id);
                                 }
                               }}
                               title="이 이력 삭제"

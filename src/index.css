@@ -994,11 +994,19 @@ input:focus, textarea:focus, select:focus {
   background: #F5EFEB;
 }
 
-.memo-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
+.memo-item-checkbox-wrap {
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: transform 0.12s ease;
+  user-select: none;
+}
+
+.memo-item-checkbox-wrap:hover {
+  transform: scale(1.15);
 }
 
 .memo-item-text {
@@ -1008,11 +1016,68 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.35;
   cursor: pointer;
   word-break: break-all;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.memo-item-text:hover {
+  background-color: rgba(99, 102, 241, 0.08);
+  color: var(--color-primary);
 }
 
 .memo-item-text.checked {
   text-decoration: line-through;
   color: var(--color-text-tertiary);
+}
+
+.memo-item-text.checked:hover {
+  color: var(--color-text-muted);
+}
+
+/* 항목 우측 끝 은은한 📝 메모 아이콘 버튼 */
+.memo-item-note-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #9CA3AF;
+  padding: 3px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: all 0.15s ease;
+}
+
+.memo-item-row:hover .memo-item-note-icon-btn {
+  opacity: 0.85;
+}
+
+.memo-item-note-icon-btn:hover {
+  opacity: 1 !important;
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.memo-item-note-icon-btn.has-note {
+  opacity: 0.95;
+  color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+.item-history-count-dot {
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--color-primary);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 9999px;
+  margin-left: 2px;
 }
 
 .memo-item-del-btn {

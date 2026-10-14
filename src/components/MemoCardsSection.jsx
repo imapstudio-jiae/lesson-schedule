@@ -215,35 +215,76 @@ export default function MemoCardsSection({
                     아직 등록된 메모 항목이 없습니다.
                   </div>
                 ) : (
-                  card.items.map((item) => (
-                    <div key={item.id} className="memo-item-row">
-                      <div 
-                        onClick={() => onToggleItemCheck(card.id, item.id)}
-                        style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      >
-                        {item.checked ? (
-                          <CheckSquare size={17} color={theme.badge} />
-                        ) : (
-                          <Square size={17} color="var(--color-text-tertiary)" />
-                        )}
+                  card.items.map((item) => {
+                    const hasItemHistory = Boolean(item.detailNote || (item.history && item.history.length > 0));
+
+                    return (
+                      <div key={item.id} className="memo-item-row">
+                        {/* 1. 네모 체크박스 영역 클릭: e.stopPropagation()으로 팝업 차단, 단순 완료/미완료 토글만 동작 */}
+                        <div 
+                          className="memo-item-checkbox-wrap"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleItemCheck(card.id, item.id);
+                          }}
+                          title={item.checked ? "완료 해제" : "완료 체크"}
+                        >
+                          {item.checked ? (
+                            <CheckSquare size={17} color={theme.badge} />
+                          ) : (
+                            <Square size={17} color="var(--color-text-tertiary)" />
+                          )}
+                        </div>
+
+                        {/* 2. 항목 글자 텍스트 영역 클릭: 세부 내용 모달(팝업) 열기 */}
+                        <span 
+                          className={`memo-item-text ${item.checked ? 'checked' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenDetailModal && onOpenDetailModal(card, item);
+                          }}
+                          title="클릭하여 세부 메모 작성 및 날짜별 이력 보기"
+                        >
+                          {item.text}
+                        </span>
+
+                        {/* 3. 시각적 피드백: 항목 우측 끝 은은한 📝 메모 아이콘 */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: 'auto' }}>
+                          <button
+                            type="button"
+                            className={`memo-item-note-icon-btn ${hasItemHistory ? 'has-note' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenDetailModal && onOpenDetailModal(card, item);
+                            }}
+                            title={hasItemHistory 
+                              ? `세부 메모 및 누적 이력 (${item.history?.length || 0}건) 확인하기` 
+                              : "세부 메모 작성 및 날짜별 이력 남기기"}
+                          >
+                            <FileText size={13} />
+                            {item.history && item.history.length > 0 && (
+                              <span className="item-history-count-dot">
+                                {item.history.length}
+                              </span>
+                            )}
+                          </button>
+
+                          {/* 항목 삭제 버튼 */}
+                          <button
+                            type="button"
+                            className="icon-btn memo-item-del-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteItemFromCard(card.id, item.id);
+                            }}
+                            title="항목 삭제"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
                       </div>
-
-                      <span 
-                        className={`memo-item-text ${item.checked ? 'checked' : ''}`}
-                        onClick={() => onToggleItemCheck(card.id, item.id)}
-                      >
-                        {item.text}
-                      </span>
-
-                      <button
-                        className="icon-btn memo-item-del-btn"
-                        onClick={() => onDeleteItemFromCard(card.id, item.id)}
-                        title="항목 삭제"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 
