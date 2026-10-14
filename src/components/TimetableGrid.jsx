@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Calendar, Clock, GripVertical } from 'lucide-react';
+import { Plus, Calendar, Clock, GripVertical, FileText } from 'lucide-react';
 import { DAYS_OF_WEEK, TIME_SLOTS, COLOR_PALETTES } from '../constants';
 
 export default function TimetableGrid({
@@ -159,6 +159,8 @@ export default function TimetableGrid({
                         {lesson ? (
                           (() => {
                             const style = getColorStyle(lesson.color);
+                            const hasMemo = Boolean(lesson.memo && lesson.memo.trim());
+
                             return (
                               <div 
                                 className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''}`}
@@ -172,16 +174,21 @@ export default function TimetableGrid({
                                   borderLeftWidth: '4px',
                                   borderLeftStyle: 'solid'
                                 }}
-                                title={`${lesson.studentName} (${lesson.lessonType})\n* 마우스로 드래그하여 다른 시간/요일로 이동할 수 있습니다.`}
+                                title={`${lesson.studentName} (${lesson.lessonType})${hasMemo ? `\n• 메모: ${lesson.memo}` : ''}\n* 클릭하여 세부 정보 수정 및 지난 수업 이력 확인\n* 마우스 드래그로 다른 요일/시간 이동`}
                               >
                                 <div className="lesson-card-header">
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', minWidth: 0 }}>
+                                  <div className="lesson-card-student-wrap">
                                     <span className="card-drag-handle" title="드래그하여 이동">
                                       <GripVertical size={12} />
                                     </span>
                                     <span className="student-name" style={{ color: style.color }}>
                                       {lesson.studentName}
                                     </span>
+                                    {hasMemo && (
+                                      <span className="card-memo-indicator" title={`작성된 메모: ${lesson.memo}`}>
+                                        <FileText size={12} />
+                                      </span>
+                                    )}
                                   </div>
                                   <span 
                                     className="lesson-type-badge" 
@@ -193,11 +200,6 @@ export default function TimetableGrid({
                                     {lesson.lessonType}
                                   </span>
                                 </div>
-                                {lesson.memo && (
-                                  <p className="lesson-card-memo">
-                                    {lesson.memo}
-                                  </p>
-                                )}
                               </div>
                             );
                           })()

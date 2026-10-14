@@ -684,12 +684,16 @@ input:focus, textarea:focus, select:focus {
 .slot-cell {
   border-right: 1px solid var(--color-border-subtle);
   border-bottom: 1px solid var(--color-border-subtle);
-  padding: 4px 6px;
-  height: 52px;
-  vertical-align: top;
+  padding: 4px 5px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
+  vertical-align: middle;
   position: relative;
   cursor: pointer;
   background: white;
+  overflow: hidden;
   transition: all 0.15s ease;
 }
 
@@ -717,21 +721,24 @@ input:focus, textarea:focus, select:focus {
   opacity: 1;
 }
 
-/* 레슨 카드 디자인 및 드래그 앤 드롭 */
+/* 레슨 카드 디자인 및 드래그 앤 드롭 (크기 고정 및 텍스트 넘침 방지) */
 .lesson-card {
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  min-height: 44px;
+  max-height: 40px;
+  box-sizing: border-box;
   border-radius: var(--radius-sm);
-  padding: 6px 8px;
+  padding: 4px 7px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  gap: 3px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-left: 3.5px solid transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: left;
   cursor: grab;
   user-select: none;
@@ -742,8 +749,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .lesson-card:hover {
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 드래그 중인 카드 상태 */
@@ -820,37 +827,55 @@ input:focus, textarea:focus, select:focus {
 }
 
 .lesson-card-header {
+  width: 100%;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
+  overflow: hidden;
+}
+
+.lesson-card-student-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .student-name {
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.card-memo-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  opacity: 0.85;
+  flex-shrink: 0;
+  margin-left: 1px;
 }
 
 .lesson-type-badge {
-  font-size: 0.72rem;
+  font-size: 0.70rem;
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.7);
-  white-space: nowrap;
-}
-
-.lesson-card-memo {
-  font-size: 0.74rem;
-  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  max-width: 90px;
+  flex-shrink: 0;
 }
 
 /* ===== 하단 동적 메모 카드 영역 ===== */
