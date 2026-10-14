@@ -48,6 +48,28 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [lessons, setLessons] = useState({});
   const [memoCards, setMemoCards] = useState([]);
+
+  // 학생별 지난 수업 메모/진도 이력(History) 상태
+  const [studentHistories, setStudentHistories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('music_studio_student_histories');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse student histories:', e);
+    }
+    return {
+      '최수연': [
+        { id: 'h-1', date: '2026.10.12 14:00', lessonType: '40분 정규 레슨', memo: '쇼팽 녹턴 9-2 도입부 루바토 및 페달링 점검', day: 'mon', time: '13:00' },
+        { id: 'h-2', date: '2026.10.05 13:00', lessonType: '40분 정규 레슨', memo: '하농 38번 아르페지오 템포 112 완성, 악보 리딩 지도', day: 'mon', time: '13:00' }
+      ],
+      '박준혁': [
+        { id: 'h-3', date: '2026.10.07 15:00', lessonType: '성인 그룹 레슨', memo: '재즈 기본 2-5-1 보이싱 텐션 코드 복습', day: 'mon', time: '14:30' }
+      ],
+      '윤채원': [
+        { id: 'h-4', date: '2026.10.10 13:30', lessonType: '1시간 정규 레슨', memo: '발트슈타인 1악장 발전부 왼손 트릴 테크닉 릴리즈 훈련', day: 'fri', time: '13:00' }
+      ]
+    };
+  });
   
   // 모달 상태 (레슨 등록/수정 모달만 유지)
   const [lessonModalCell, setLessonModalCell] = useState(null);
@@ -107,6 +129,13 @@ export default function App() {
     saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave).catch(() => {});
   }, [yearMonthKey, studioId, getStorageKey]);
 
+  // 학생별 지난 수업 이력 영구 저장 및 실시간 전파
+  const persistStudentHistories = useCallback((newHistories) => {
+    localStorage.setItem('music_studio_student_histories', JSON.stringify(newHistories));
+    realtimeSync.broadcastUpdate('student_histories', newHistories);
+    saveMonthDataToFirestore(studioId, 'student_histories', newHistories).catch(() => {});
+  }, [studioId]);
+
   // 월 변경 및 실시간 동기화 엔진 리스너 등록
   useEffect(() => {
     // 1. 로컬 캐시 즉시 렌더링
@@ -124,11 +153,15 @@ export default function App() {
         setMemoCards(data.memoCards ?? []);
         localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(data));
         setTimeout(() => { isRemoteUpdating.current = false; }, 100);
+      } else if (payloadKey === 'student_histories' && data) {
+        setStudentHistories(data);
+        localStorage.setItem('music_studio_student_histories', JSON.stringify(data));
       }
     });
 
     // 3. Firestore 실시간 리스너 자동 연결
     let unsubscribeFirestore = null;
+    let unsubscribeHistoriesFirestore = null;
     try {
       unsubscribeFirestore = subscribeToMonthData(
         studioId,
@@ -145,11 +178,24 @@ export default function App() {
         },
         () => {}
       );
+
+      unsubscribeHistoriesFirestore = subscribeToMonthData(
+        studioId,
+        'student_histories',
+        (remoteHistories) => {
+          if (remoteHistories && typeof remoteHistories === 'object') {
+            setStudentHistories(remoteHistories);
+            localStorage.setItem('music_studio_student_histories', JSON.stringify(remoteHistories));
+          }
+        },
+        () => {}
+      );
     } catch (e) {}
 
     return () => {
       if (unsubscribeSync) unsubscribeSync();
       if (unsubscribeFirestore) unsubscribeFirestore();
+      if (unsubscribeHistoriesFirestore) unsubscribeHistoriesFirestore();
     };
   }, [yearMonthKey, studioId, loadLocalMonthData, yearMonthLabel, getStorageKey]);
 
@@ -195,7 +241,7 @@ export default function App() {
     persistMonthData(text, lessons, memoCards);
   };
 
-  // 레슨 추가/수정
+  // 레슨 추가/수정 (메모 작성 시 학생별 지난 수업 이력도 함께 누적 저장)
   const handleSaveLesson = (cellKey, lessonData) => {
     setLessons((prevLessons) => {
       const updated = {
@@ -204,6 +250,52 @@ export default function App() {
       };
       persistMonthData(notice, updated, memoCards);
       return updated;
+    });
+
+    // 학생 이름과 메모가 있는 경우, 해당 학생의 진도 이력에 누적 기록
+    if (lessonData.studentName && lessonData.memo && lessonData.memo.trim()) {
+      const studentName = lessonData.studentName.trim();
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      setStudentHistories((prev) => {
+        const list = prev[studentName] || [];
+        // 직전 최신 항목과 메모 내용이 동일하다면 중복 추가 방지
+        if (list.length > 0 && list[0].memo === lessonData.memo.trim()) {
+          return prev;
+        }
+
+        const newHistory = {
+          id: `hist-${Date.now()}`,
+          date: dateStr,
+          lessonType: lessonData.lessonType,
+          memo: lessonData.memo.trim(),
+          day: lessonData.day,
+          time: lessonData.time
+        };
+
+        const updatedHistories = {
+          ...prev,
+          [studentName]: [newHistory, ...list]
+        };
+
+        persistStudentHistories(updatedHistories);
+        return updatedHistories;
+      });
+    }
+  };
+
+  // 학생별 특정 수업 이력 삭제
+  const handleDeleteStudentHistory = (studentName, historyId) => {
+    setStudentHistories((prev) => {
+      const list = prev[studentName] || [];
+      const updatedList = list.filter((h) => h.id !== historyId);
+      const updatedHistories = {
+        ...prev,
+        [studentName]: updatedList
+      };
+      persistStudentHistories(updatedHistories);
+      return updatedHistories;
     });
   };
 
@@ -409,6 +501,8 @@ export default function App() {
         cellInfo={lessonModalCell}
         onSaveLesson={handleSaveLesson}
         onDeleteLesson={handleDeleteLesson}
+        studentHistories={studentHistories}
+        onDeleteStudentHistory={handleDeleteStudentHistory}
       />
     </div>
   );

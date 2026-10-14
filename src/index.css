@@ -1160,6 +1160,150 @@ input:focus, textarea:focus, select:focus {
   gap: 10px;
 }
 
+/* ===== 학생 지난 수업 이력 (History) 아코디언 스타일 ===== */
+.student-history-accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #FAF8F5;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.history-accordion-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-main);
+  font-size: 0.88rem;
+  transition: background-color 0.15s ease;
+}
+
+.history-accordion-toggle:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.history-count-badge {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.history-accordion-content {
+  padding: 10px 12px 14px 12px;
+  border-top: 1px solid var(--color-border);
+  background: white;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.history-item-card {
+  background: #FDFBF7;
+  border: 1px solid #EBE5DF;
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.15s ease;
+}
+
+.history-item-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.history-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.history-item-date {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.history-item-type {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.history-item-memo {
+  font-size: 0.84rem;
+  color: var(--color-text-main);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.btn-history-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: white;
+  border: 1px solid var(--color-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-history-action:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-history-delete {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  padding: 3px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.btn-history-delete:hover {
+  color: #DC2626;
+  background: #FEE2E2;
+}
+
+.history-empty-placeholder {
+  text-align: center;
+  padding: 18px 10px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
 /* ===== 인쇄 스타일 ===== */
 @media print {
   body {

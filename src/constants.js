@@ -23,14 +23,16 @@ export function generateTimeSlots(startHour = 13, endHour = 20) {
 
 export const TIME_SLOTS = generateTimeSlots(13, 20);
 
-// 기본 레슨 유형 프리셋
+// 개편된 레슨 수업 형태 / 시간 프리셋
 export const LESSON_TYPES = [
-  { label: '40분 정규 레슨', duration: '40분' },
-  { label: '성인그룹 (40분)', duration: '40분' },
-  { label: '30분 기초/원포인트', duration: '30분' },
-  { label: '50분 집중 레슨', duration: '50분' },
-  { label: '60분 마스터/입시', duration: '60분' },
-  { label: '보강 / 테스트', duration: '40분' },
+  '40분 정규 레슨',
+  '1시간 정규 레슨',
+  '성인 그룹 레슨',
+  '학생 그룹 레슨',
+  '학생 합주 레슨',
+  '보강',
+  '녹음',
+  '직접 입력'
 ];
 
 // 카드 및 레슨 뱃지 색상 팔레트 (연한 민트 & 라벤더 보라 테마와 어우러지는 파스텔 팔레트)
@@ -112,7 +114,7 @@ export function getDefaultLessons() {
     'mon-14:30': {
       id: 'l-2',
       studentName: '박준혁',
-      lessonType: '성인그룹 (40분)',
+      lessonType: '성인 그룹 레슨',
       duration: '40분',
       color: 'sage',
       memo: '재즈 코드 보이싱 II-V-I 패턴',
@@ -132,8 +134,8 @@ export function getDefaultLessons() {
     'wed-14:00': {
       id: 'l-4',
       studentName: '김도윤',
-      lessonType: '50분 집중 레슨',
-      duration: '50분',
+      lessonType: '1시간 정규 레슨',
+      duration: '60분',
       color: 'lavender',
       memo: '예고 실기 대비 바흐 평균율 프렐류드',
       day: 'wed',
@@ -142,7 +144,7 @@ export function getDefaultLessons() {
     'wed-16:30': {
       id: 'l-5',
       studentName: '한서아',
-      lessonType: '30분 기초/원포인트',
+      lessonType: '보강',
       duration: '30분',
       color: 'peach',
       memo: '바이엘 4권 양손 아티큘레이션',
@@ -152,7 +154,7 @@ export function getDefaultLessons() {
     'thu-17:00': {
       id: 'l-6',
       studentName: '강태우',
-      lessonType: '성인그룹 (40분)',
+      lessonType: '성인 그룹 레슨',
       duration: '40분',
       color: 'amber',
       memo: '영화 OST 연주곡 (인터스텔라 테마)',
@@ -162,7 +164,7 @@ export function getDefaultLessons() {
     'fri-13:00': {
       id: 'l-7',
       studentName: '윤채원',
-      lessonType: '60분 마스터/입시',
+      lessonType: '1시간 정규 레슨',
       duration: '60분',
       color: 'orange',
       memo: '베토벤 소나타 발트슈타인 1악장',
@@ -172,7 +174,7 @@ export function getDefaultLessons() {
     'sat-13:00': {
       id: 'l-8',
       studentName: '임서진',
-      lessonType: '40분 정규 레슨',
+      lessonType: '학생 그룹 레슨',
       duration: '40분',
       color: 'sky',
       memo: '듀오 앙상블 파트 리허설',
@@ -182,7 +184,7 @@ export function getDefaultLessons() {
     'sat-14:30': {
       id: 'l-9',
       studentName: '밴드 앙상블팀',
-      lessonType: '성인그룹 (40분)',
+      lessonType: '학생 합주 레슨',
       duration: '60분',
       color: 'sage',
       memo: '합주실 A룸 단체 세션',
