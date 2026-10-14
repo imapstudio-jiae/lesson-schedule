@@ -612,6 +612,7 @@ input:focus, textarea:focus, select:focus {
 .timetable-table {
   width: 100%;
   min-width: 960px;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -629,11 +630,15 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--color-text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .timetable-table thead th:first-child {
-  width: 90px;
-  min-width: 90px;
+  width: 84px;
+  min-width: 84px;
+  max-width: 84px;
   position: sticky;
   left: 0;
   z-index: 25;
@@ -721,7 +726,7 @@ input:focus, textarea:focus, select:focus {
   opacity: 1;
 }
 
-/* 레슨 카드 디자인 및 드래그 앤 드롭 (크기 고정 및 텍스트 넘침 방지) */
+/* 레슨 카드 디자인 및 드래그 앤 드롭 (셀 너비 100% 고정, 가로 팽창 방지) */
 .lesson-card {
   width: 100%;
   max-width: 100%;
@@ -729,19 +734,19 @@ input:focus, textarea:focus, select:focus {
   max-height: 40px;
   box-sizing: border-box;
   border-radius: var(--radius-sm);
-  padding: 4px 7px;
+  padding: 4px 6px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-left: 3.5px solid transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   text-align: left;
   cursor: grab;
   user-select: none;
+  min-width: 0;
 }
 
 .lesson-card:active {
@@ -828,10 +833,10 @@ input:focus, textarea:focus, select:focus {
 
 .lesson-card-header {
   width: 100%;
-  max-width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 4px;
   overflow: hidden;
 }
@@ -839,20 +844,21 @@ input:focus, textarea:focus, select:focus {
 .lesson-card-student-wrap {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
-  flex: 1;
+  flex: 1 1 0;
   overflow: hidden;
 }
 
 .student-name {
   font-weight: 700;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+  flex: 1 1 0;
 }
 
 .card-memo-indicator {
@@ -866,16 +872,17 @@ input:focus, textarea:focus, select:focus {
 }
 
 .lesson-type-badge {
-  font-size: 0.70rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90px;
+  max-width: 72px;
   flex-shrink: 0;
+  line-height: 1.4;
 }
 
 /* ===== 하단 동적 메모 카드 영역 ===== */
