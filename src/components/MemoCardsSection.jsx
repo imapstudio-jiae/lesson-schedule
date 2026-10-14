@@ -9,7 +9,9 @@ import {
   Square, 
   Palette, 
   Bookmark,
-  Sparkles
+  Sparkles,
+  FileText,
+  History
 } from 'lucide-react';
 import { COLOR_PALETTES } from '../constants';
 
@@ -21,7 +23,8 @@ export default function MemoCardsSection({
   onUpdateCardColor,
   onAddItemToCard,
   onToggleItemCheck,
-  onDeleteItemFromCard
+  onDeleteItemFromCard,
+  onOpenDetailModal
 }) {
   const [editingCardId, setEditingCardId] = useState(null);
   const [editingTitleText, setEditingTitleText] = useState('');
@@ -117,15 +120,34 @@ export default function MemoCardsSection({
                 ) : (
                   <div 
                     className="memo-card-title-display"
-                    onDoubleClick={() => handleStartEditTitle(card)}
+                    onClick={() => onOpenDetailModal && onOpenDetailModal(card)}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      handleStartEditTitle(card);
+                    }}
+                    title="클릭하여 세부 메모 및 날짜별 이력 보기 (더블클릭 시 제목 변경)"
+                    style={{ cursor: 'pointer' }}
                   >
                     <span style={{ color: theme.badge }}>●</span>
-                    <span>{card.title}</span>
+                    <span style={{ fontWeight: '700' }}>{card.title}</span>
+                    {card.history && card.history.length > 0 && (
+                      <span className="card-history-mini-badge" title={`누적된 지난 이력: ${card.history.length}건`}>
+                        <History size={11} />
+                        <span>{card.history.length}</span>
+                      </span>
+                    )}
                   </div>
                 )}
 
-                {/* 카드 상단 도구 (색상, 제목 수정, 카드 삭제) */}
+                {/* 카드 상단 도구 (세부 모달 열기, 색상, 제목 수정, 카드 삭제) */}
                 <div className="memo-card-tools">
+                  <button 
+                    className="icon-btn highlight-btn"
+                    onClick={() => onOpenDetailModal && onOpenDetailModal(card)}
+                    title="세부 메모 & 작성 날짜별 이력 모달 열기"
+                  >
+                    <FileText size={14} color="var(--color-primary)" />
+                  </button>
                   <button 
                     className="icon-btn" 
                     onClick={() => setColorPickerCardId(isPickingColor ? null : card.id)}

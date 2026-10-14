@@ -52,7 +52,7 @@ export function getDefaultMemoCards() {
   return [
     {
       id: 'card-special-schedule',
-      title: '특수 일정 / 최수연',
+      title: '스튜디오 운영 To-Do',
       color: 'orange',
       items: [
         { id: 'item-1', text: '10/12 (토) 실기 콩쿠르 대비 모의 리허설 (14:00)', checked: false },

@@ -4,6 +4,7 @@ import NoticeBanner from './components/NoticeBanner';
 import TimetableGrid from './components/TimetableGrid';
 import LessonModal from './components/LessonModal';
 import MemoCardsSection from './components/MemoCardsSection';
+import MemoDetailModal from './components/MemoDetailModal';
 
 import { 
   getStoredStudioId, 
@@ -71,8 +72,9 @@ export default function App() {
     };
   });
   
-  // 모달 상태 (레슨 등록/수정 모달만 유지)
+  // 모달 상태 (레슨 등록/수정 모달 및 메모 세부 모달)
   const [lessonModalCell, setLessonModalCell] = useState(null);
+  const [selectedMemoCard, setSelectedMemoCard] = useState(null);
 
   // 무한 업데이트 루프 방지용 플래그
   const isRemoteUpdating = useRef(false);
@@ -92,10 +94,19 @@ export default function App() {
         if (typeof currentNotice === 'string' && currentNotice.includes('•')) {
           currentNotice = getDefaultNotice(ymLabel);
         }
+
+        let loadedCards = parsed.memoCards ?? getDefaultMemoCards();
+        // 첫 번째 카드가 '특수 일정'인 경우 '스튜디오 운영 To-Do'로 자동 마이그레이션
+        if (Array.isArray(loadedCards) && loadedCards.length > 0) {
+          if (loadedCards[0].title.includes('특수 일정')) {
+            loadedCards[0] = { ...loadedCards[0], title: '스튜디오 운영 To-Do' };
+          }
+        }
+
         return {
           notice: currentNotice,
           lessons: parsed.lessons ?? {},
-          memoCards: parsed.memoCards ?? getDefaultMemoCards()
+          memoCards: loadedCards
         };
       } catch (e) {
         console.error(e);
@@ -437,6 +448,43 @@ export default function App() {
     persistMonthData(notice, lessons, updated);
   };
 
+  // 메모 카드 세부 내용 저장 및 날짜별 이력 누적
+  const handleSaveCardDetail = (cardId, detailNote, newHistoryItem) => {
+    setMemoCards((prevCards) => {
+      const updated = prevCards.map((c) => {
+        if (c.id === cardId) {
+          const prevHistory = c.history || [];
+          return {
+            ...c,
+            detailNote,
+            history: [newHistoryItem, ...prevHistory]
+          };
+        }
+        return c;
+      });
+      persistMonthData(notice, lessons, updated);
+      return updated;
+    });
+  };
+
+  // 메모 카드 특정 이력 항목 삭제
+  const handleDeleteCardHistory = (cardId, historyId) => {
+    setMemoCards((prevCards) => {
+      const updated = prevCards.map((c) => {
+        if (c.id === cardId) {
+          const prevHistory = c.history || [];
+          return {
+            ...c,
+            history: prevHistory.filter((h) => h.id !== historyId)
+          };
+        }
+        return c;
+      });
+      persistMonthData(notice, lessons, updated);
+      return updated;
+    });
+  };
+
   // 샘플 데이터 복원
   const handleLoadSampleData = () => {
     if (confirm('현재 월에 예시 레슨 일정과 4개 기본 메모 카드를 불러오시겠습니까?')) {
@@ -492,6 +540,7 @@ export default function App() {
         onAddItemToCard={handleAddItemToCard}
         onToggleItemCheck={handleToggleItemCheck}
         onDeleteItemFromCard={handleDeleteItemFromCard}
+        onOpenDetailModal={(card) => setSelectedMemoCard(card)}
       />
 
       {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
@@ -503,6 +552,15 @@ export default function App() {
         onDeleteLesson={handleDeleteLesson}
         studentHistories={studentHistories}
         onDeleteStudentHistory={handleDeleteStudentHistory}
+      />
+
+      {/* 메모 카드 세부 내용 & 날짜별 이력 관리 모달 */}
+      <MemoDetailModal
+        isOpen={Boolean(selectedMemoCard)}
+        onClose={() => setSelectedMemoCard(null)}
+        card={selectedMemoCard ? memoCards.find(c => c.id === selectedMemoCard.id) || selectedMemoCard : null}
+        onSaveCardDetail={handleSaveCardDetail}
+        onDeleteCardHistory={handleDeleteCardHistory}
       />
     </div>
   );
