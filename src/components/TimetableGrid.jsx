@@ -26,8 +26,6 @@ export default function TimetableGrid({
     };
   };
 
-  // 총 등록된 레슨 수 계산
-  const totalLessons = Object.keys(lessons).length;
 
   // 드래그 시작
   const handleDragStart = (e, slotKey) => {
@@ -98,9 +96,6 @@ export default function TimetableGrid({
           <div className="stat-item">
             <Clock size={15} />
             <span>운영 시간: <strong>13:00 ~ 20:00 (30분 단위)</strong></span>
-          </div>
-          <div className="stat-item">
-            <span>이번 달 배정 레슨: <span className="stat-count">{totalLessons}</span>건</span>
           </div>
         </div>
       </div>
