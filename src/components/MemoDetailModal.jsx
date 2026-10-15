@@ -226,7 +226,7 @@ export default function MemoDetailModal({
               className="memo-detail-textarea"
               value={detailNote}
               onChange={(e) => setDetailNote(e.target.value)}
-              placeholder="예: Love Story 도입부 페달링 릴리즈 점검, 진행 상황 및 관련 세부 메모 입력... (빈칸으로 저장 가능)"
+              placeholder=""
               rows={4}
               autoFocus={!isEditingTitle}
             />
