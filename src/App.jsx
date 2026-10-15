@@ -517,6 +517,38 @@ export default function App() {
     });
   };
 
+  // 메모 카드 항목 제목(text) 수정
+  const handleUpdateItemTitle = (cardId, itemId, newText) => {
+    const updated = memoCards.map(c => {
+      if (c.id === cardId) {
+        return {
+          ...c,
+          items: (c.items || []).map(it =>
+            it.id === itemId ? { ...it, text: newText } : it
+          )
+        };
+      }
+      return c;
+    });
+    setMemoCards(updated);
+    persistMonthData(notice, lessons, updated);
+  };
+
+  // 메모 카드 순서 재배열
+  const handleReorderCards = (reorderedCards) => {
+    setMemoCards(reorderedCards);
+    persistMonthData(notice, lessons, reorderedCards);
+  };
+
+  // 메모 카드 내부 항목 순서 재배열
+  const handleReorderItems = (cardId, reorderedItems) => {
+    const updated = memoCards.map(c =>
+      c.id === cardId ? { ...c, items: reorderedItems } : c
+    );
+    setMemoCards(updated);
+    persistMonthData(notice, lessons, updated);
+  };
+
   // 샘플 데이터 복원
   const handleLoadSampleData = () => {
     if (confirm('현재 월에 예시 레슨 일정과 4개 기본 메모 카드를 불러오시겠습니까?')) {
@@ -573,6 +605,8 @@ export default function App() {
         onToggleItemCheck={handleToggleItemCheck}
         onDeleteItemFromCard={handleDeleteItemFromCard}
         onOpenDetailModal={(card, item = null) => setSelectedMemoDetail({ card, item })}
+        onReorderCards={handleReorderCards}
+        onReorderItems={handleReorderItems}
       />
 
       {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
@@ -602,6 +636,8 @@ export default function App() {
             activeItem={currentItem}
             onSaveCardDetail={handleSaveCardDetail}
             onDeleteCardHistory={handleDeleteCardHistory}
+            onUpdateItemTitle={handleUpdateItemTitle}
+            onUpdateCardTitle={handleUpdateCardTitle}
           />
         );
       })()}

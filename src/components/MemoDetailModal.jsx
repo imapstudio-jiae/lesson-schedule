@@ -10,7 +10,8 @@ import {
   Bookmark, 
   Clock,
   CheckSquare,
-  Square
+  Square,
+  Edit2
 } from 'lucide-react';
 import { COLOR_PALETTES } from '../constants';
 
@@ -20,9 +21,13 @@ export default function MemoDetailModal({
   card,
   activeItem = null,
   onSaveCardDetail,
-  onDeleteCardHistory
+  onDeleteCardHistory,
+  onUpdateItemTitle,   // 항목 제목 수정 콜백
+  onUpdateCardTitle    // 카드 제목 수정 콜백
 }) {
   const [detailNote, setDetailNote] = useState('');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitleText, setEditingTitleText] = useState('');
 
   // activeItem이 있으면 activeItem 기준, 없으면 card 기준
   const targetNote = activeItem ? (activeItem.detailNote || '') : (card?.detailNote || '');
@@ -31,6 +36,8 @@ export default function MemoDetailModal({
   useEffect(() => {
     if (!isOpen || !card) return;
     setDetailNote(targetNote);
+    setIsEditingTitle(false);
+    setEditingTitleText('');
   }, [isOpen, card, activeItem]);
 
   if (!isOpen || !card) return null;
@@ -38,6 +45,27 @@ export default function MemoDetailModal({
   const theme = COLOR_PALETTES.find(c => c.id === card.color) || COLOR_PALETTES[0];
   const titleText = activeItem ? activeItem.text : card.title;
   const subCategoryText = activeItem ? `${card.title} 항목` : '운영 메모 카드';
+
+  const handleStartEditTitle = () => {
+    setEditingTitleText(titleText);
+    setIsEditingTitle(true);
+  };
+
+  const handleSaveTitle = () => {
+    const trimmed = editingTitleText.trim();
+    if (!trimmed) return;
+    if (activeItem && onUpdateItemTitle) {
+      onUpdateItemTitle(card.id, activeItem.id, trimmed);
+    } else if (!activeItem && onUpdateCardTitle) {
+      onUpdateCardTitle(card.id, trimmed);
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleCancelEditTitle = () => {
+    setIsEditingTitle(false);
+    setEditingTitleText('');
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -76,7 +104,7 @@ export default function MemoDetailModal({
       <div className="modal-card memo-detail-modal" onClick={(e) => e.stopPropagation()}>
         {/* 모달 상단 헤더 */}
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
             <span 
               style={{ 
                 display: 'inline-block', 
@@ -87,13 +115,59 @@ export default function MemoDetailModal({
                 flexShrink: 0
               }} 
             />
-            <div style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>
                 {subCategoryText}
               </div>
-              <h3 className="modal-title" style={{ fontSize: '1.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {titleText}
-              </h3>
+
+              {/* 제목 표시 / 수정 영역 */}
+              {isEditingTitle ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <input
+                    type="text"
+                    className="memo-card-title-input"
+                    value={editingTitleText}
+                    onChange={(e) => setEditingTitleText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveTitle();
+                      if (e.key === 'Escape') handleCancelEditTitle();
+                    }}
+                    autoFocus
+                    style={{ flex: 1, fontSize: '1rem', fontWeight: '700' }}
+                  />
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={handleSaveTitle}
+                    title="제목 저장"
+                  >
+                    <Check size={14} color="var(--color-primary)" />
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={handleCancelEditTitle}
+                    title="취소"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <h3 className="modal-title" style={{ fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                    {titleText}
+                  </h3>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={handleStartEditTitle}
+                    title={activeItem ? '항목 제목 수정' : '카드 제목 수정'}
+                    style={{ flexShrink: 0, opacity: 0.65 }}
+                  >
+                    <Edit2 size={13} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <button className="icon-btn" onClick={onClose} title="닫기">
@@ -141,7 +215,7 @@ export default function MemoDetailModal({
               onChange={(e) => setDetailNote(e.target.value)}
               placeholder="예: Love Story 도입부 페달링 릴리즈 점검, 진행 상황 및 관련 세부 메모 입력..."
               rows={4}
-              autoFocus
+              autoFocus={!isEditingTitle}
               required
             />
           </div>

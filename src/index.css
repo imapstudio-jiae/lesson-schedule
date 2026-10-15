@@ -1499,3 +1499,100 @@ input:focus, textarea:focus, select:focus {
     page-break-inside: avoid;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   DnD (Drag & Drop) 관련 스타일 - dnd-kit
+   ════════════════════════════════════════════════════════════════ */
+
+/* 항목 행 드래그 핸들 */
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-tertiary);
+  opacity: 0;
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.memo-item-row:hover .drag-handle {
+  opacity: 0.7;
+}
+
+.drag-handle:hover {
+  opacity: 1 !important;
+  color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  color: var(--color-primary);
+}
+
+/* 카드 드래그 핸들 */
+.card-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-tertiary);
+  opacity: 0;
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: 5px;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+  margin-right: 2px;
+}
+
+.memo-card-item:hover .card-drag-handle {
+  opacity: 0.6;
+}
+
+.card-drag-handle:hover {
+  opacity: 1 !important;
+  color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.card-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* 드래그 중인 항목 행 */
+.memo-item-row.is-dragging {
+  background: rgba(99, 102, 241, 0.05);
+  border: 1.5px dashed rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+/* 드래그 중인 카드 */
+.memo-card-item.is-dragging {
+  background: rgba(240, 238, 255, 0.6) !important;
+  border: 1.5px dashed rgba(99, 102, 241, 0.4) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* DragOverlay 카드 - 유령 카드 애니메이션 */
+.drag-overlay-card {
+  pointer-events: none;
+  animation: dnd-lift 0.12s ease forwards;
+}
+
+@keyframes dnd-lift {
+  from {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    transform: rotate(1.5deg) scale(1.03);
+  }
+}
+
