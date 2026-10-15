@@ -1355,6 +1355,41 @@ input:focus, textarea:focus, select:focus {
   word-break: break-word;
 }
 
+/* 이력 항목 인라인 수정 textarea */
+.history-item-edit-textarea {
+  width: 100%;
+  font-size: 0.84rem;
+  color: var(--color-text-main);
+  line-height: 1.45;
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.04);
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.history-item-edit-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* 이력 저장 버튼 (초록색 강조) */
+.btn-history-save {
+  color: #16A34A !important;
+  border-color: #BBF7D0 !important;
+}
+
+.btn-history-save:hover {
+  background: #16A34A !important;
+  color: white !important;
+  border-color: #16A34A !important;
+}
+
+
 .btn-history-action {
   display: inline-flex;
   align-items: center;

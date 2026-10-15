@@ -517,6 +517,40 @@ export default function App() {
     });
   };
 
+  // 메모 카드 이력 항목 내용 수정
+  const handleEditCardHistory = (cardId, itemId, historyId, newNote) => {
+    setMemoCards((prevCards) => {
+      const updated = prevCards.map((c) => {
+        if (c.id === cardId) {
+          if (itemId) {
+            const updatedItems = (c.items || []).map((it) => {
+              if (it.id === itemId) {
+                return {
+                  ...it,
+                  history: (it.history || []).map((h) =>
+                    h.id === historyId ? { ...h, note: newNote } : h
+                  )
+                };
+              }
+              return it;
+            });
+            return { ...c, items: updatedItems };
+          } else {
+            return {
+              ...c,
+              history: (c.history || []).map((h) =>
+                h.id === historyId ? { ...h, note: newNote } : h
+              )
+            };
+          }
+        }
+        return c;
+      });
+      persistMonthData(notice, lessons, updated);
+      return updated;
+    });
+  };
+
   // 메모 카드 항목 제목(text) 수정
   const handleUpdateItemTitle = (cardId, itemId, newText) => {
     const updated = memoCards.map(c => {
@@ -636,6 +670,7 @@ export default function App() {
             activeItem={currentItem}
             onSaveCardDetail={handleSaveCardDetail}
             onDeleteCardHistory={handleDeleteCardHistory}
+            onEditCardHistory={handleEditCardHistory}
             onUpdateItemTitle={handleUpdateItemTitle}
             onUpdateCardTitle={handleUpdateCardTitle}
           />
