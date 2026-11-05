@@ -103,9 +103,15 @@ export default function TimetableGrid({
       {/* 스크롤 가능한 7개 열 테이블 그리드 */}
       <div className="timetable-scroll-wrap">
         <table className="timetable-table">
+          <colgroup>
+            <col style={{ width: '84px', minWidth: '84px' }} />
+            {DAYS_OF_WEEK.map((day) => (
+              <col key={day.key} style={{ width: 'calc((100% - 84px) / 6)' }} />
+            ))}
+          </colgroup>
           <thead>
             <tr>
-              <th scope="col" style={{ width: '90px' }}>시간</th>
+              <th scope="col" style={{ width: '84px' }}>시간</th>
               {DAYS_OF_WEEK.map((day) => (
                 <th 
                   key={day.key} 

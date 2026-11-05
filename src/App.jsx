@@ -84,6 +84,41 @@ export default function App() {
     return `studio_${studioId}_month_${ym}`;
   }, [studioId]);
 
+  // 이전 달의 YYYY-MM 키 계산 유틸
+  const getPrevYearMonthKey = useCallback((ym) => {
+    const [y, m] = ym.split('-').map(Number);
+    const prevMonth = m === 1 ? 12 : m - 1;
+    const prevYear = m === 1 ? y - 1 : y;
+    return `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+  }, []);
+
+  // 이전 달 레슨 데이터를 복사 (메모는 비우고 스케줄 구조만 가져오기)
+  const copyLessonsFromPrevMonth = useCallback((ym) => {
+    const prevYm = getPrevYearMonthKey(ym);
+    const prevRaw = localStorage.getItem(getStorageKey(prevYm));
+    if (!prevRaw) return {};
+
+    try {
+      const prevData = JSON.parse(prevRaw);
+      const prevLessons = prevData.lessons;
+      if (!prevLessons || typeof prevLessons !== 'object') return {};
+
+      // 레슨 구조만 복사하고 memo(수업 진도 메모)는 초기화
+      const copiedLessons = {};
+      Object.entries(prevLessons).forEach(([slotKey, lesson]) => {
+        copiedLessons[slotKey] = {
+          ...lesson,
+          id: `l-copy-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          memo: ''  // 메모는 새 달에서 새로 작성
+        };
+      });
+      return copiedLessons;
+    } catch (e) {
+      console.warn('이전 달 레슨 복사 실패:', e);
+      return {};
+    }
+  }, [getStorageKey, getPrevYearMonthKey]);
+
   // 월별 초기 데이터 불러오기 (로컬 캐시)
   const loadLocalMonthData = useCallback((ym, ymLabel) => {
     const raw = localStorage.getItem(getStorageKey(ym));
@@ -113,13 +148,17 @@ export default function App() {
       }
     }
 
-    // 2026-10 등 최초 진입 시 풍성한 샘플 데이터 제공
+    // 해당 월에 저장된 데이터가 없는 경우:
+    // → 이전 달 레슨 스케줄을 자동으로 복사해서 시작 (메모는 비움)
+    const carriedLessons = copyLessonsFromPrevMonth(ym);
+    const hasCarriedLessons = Object.keys(carriedLessons).length > 0;
+
     return {
       notice: getDefaultNotice(ymLabel),
-      lessons: ym === '2026-10' ? getDefaultLessons() : {},
+      lessons: hasCarriedLessons ? carriedLessons : (ym === '2026-10' ? getDefaultLessons() : {}),
       memoCards: getDefaultMemoCards()
     };
-  }, [getStorageKey]);
+  }, [getStorageKey, copyLessonsFromPrevMonth]);
 
   // 데이터 변경 시 로컬 저장 + 실시간 클라우드 브로드캐스트 + Firestore 백엔드 자동 저장
   const persistMonthData = useCallback(async (newNotice, newLessons, newCards) => {
@@ -154,6 +193,21 @@ export default function App() {
     setNotice(initial.notice);
     setLessons(initial.lessons);
     setMemoCards(initial.memoCards);
+
+    // 이전 달에서 복사되어 온 경우(= 현재 월에 저장된 데이터가 없었던 경우)
+    // 복사된 레슨을 즉시 영구 저장하여, 다음에는 이 달의 자체 데이터로 동작
+    const existingRaw = localStorage.getItem(getStorageKey(yearMonthKey));
+    if (!existingRaw && Object.keys(initial.lessons).length > 0) {
+      const dataToSave = {
+        notice: initial.notice,
+        lessons: initial.lessons,
+        memoCards: initial.memoCards,
+        updatedAt: Date.now()
+      };
+      localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(dataToSave));
+      realtimeSync.broadcastUpdate(yearMonthKey, dataToSave);
+      saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave).catch(() => {});
+    }
 
     // 2. 실시간 클라우드 & 로컬 동기화 수신 구독
     const unsubscribeSync = realtimeSync.subscribe(({ payloadKey, data }) => {
