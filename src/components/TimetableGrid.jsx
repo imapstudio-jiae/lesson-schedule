@@ -95,7 +95,7 @@ export default function TimetableGrid({
           </div>
           <div className="stat-item">
             <Clock size={15} />
-            <span>운영 시간: <strong>13:00 ~ 20:00 (30분 단위)</strong></span>
+            <span>운영 시간: <strong>11:00 ~ 19:00 (30분 단위)</strong></span>
           </div>
         </div>
       </div>

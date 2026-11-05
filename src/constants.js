@@ -21,7 +21,7 @@ export function generateTimeSlots(startHour = 13, endHour = 20) {
   return slots;
 }
 
-export const TIME_SLOTS = generateTimeSlots(13, 20);
+export const TIME_SLOTS = generateTimeSlots(11, 19);
 
 // 개편된 레슨 수업 형태 / 시간 프리셋
 export const LESSON_TYPES = [
