@@ -30,12 +30,14 @@ export default function TimetableGrid({
   // 시간표 카드에서 공간을 적게 차지하도록 수업 형태를 직관적으로 축약
   const formatCompactLessonType = (type) => {
     if (!type) return '';
-    if (type === '40분 정규 레슨') return '40분';
-    if (type === '1시간 정규 레슨') return '60분';
-    if (type === '성인 그룹 레슨') return '성인그룹';
-    if (type === '학생 그룹 레슨') return '학생그룹';
-    if (type === '학생 합주 레슨') return '합주';
-    return type;
+    if (type.includes('40분')) return '40분';
+    if (type.includes('1시간') || type.includes('60분')) return '1시간';
+    if (type.includes('합주')) return '합주';
+    if (type.includes('성인 그룹')) return '성인';
+    if (type.includes('학생 그룹')) return '그룹';
+    if (type.includes('보강')) return '보강';
+    if (type.includes('녹음')) return '녹음';
+    return type.length > 3 ? type.slice(0, 3) : type;
   };
 
 

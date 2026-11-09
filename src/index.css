@@ -836,8 +836,8 @@ input:focus, textarea:focus, select:focus {
   min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 3px;
   overflow: hidden;
 }
 
@@ -852,8 +852,8 @@ input:focus, textarea:focus, select:focus {
 
 .student-name {
   font-weight: 800;
-  font-size: 0.92rem;
-  letter-spacing: -0.03em;
+  font-size: 0.94rem;
+  letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -873,7 +873,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .lesson-type-badge {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   padding: 1px 4px;
   border-radius: 4px;
@@ -881,8 +881,8 @@ input:focus, textarea:focus, select:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 52px;
-  flex-shrink: 0;
+  max-width: 44px;
+  flex-shrink: 2;
   line-height: 1.3;
   opacity: 0.9;
 }
