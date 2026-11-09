@@ -20,6 +20,7 @@ import {
 
 import { realtimeSync } from './realtimeSync';
 import { getSupabaseData, saveSupabaseData } from './supabase';
+import ToastNotification from './components/ToastNotification';
 
 export default function App() {
   // 현재 날짜 기준
@@ -76,6 +77,32 @@ export default function App() {
   // 모달 상태 (레슨 등록/수정 모달 및 메모 세부 모달)
   const [lessonModalCell, setLessonModalCell] = useState(null);
   const [selectedMemoDetail, setSelectedMemoDetail] = useState(null); // { card, item }
+
+  // 실시간 알림 팝업 및 변경 셀 반짝임(하이라이트) 상태
+  const [toasts, setToasts] = useState([]);
+  const [highlightedSlotKeys, setHighlightedSlotKeys] = useState([]);
+  const lessonsRef = useRef(lessons);
+  useEffect(() => {
+    lessonsRef.current = lessons;
+  }, [lessons]);
+
+  // 알림 토스트 추가
+  const addToast = useCallback((toast) => {
+    const id = 'toast_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const newToast = { id, timeStr, ...toast };
+
+    setToasts((prev) => [newToast, ...prev].slice(0, 5));
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   // 무한 업데이트 루프 방지용 플래그
   const isRemoteUpdating = useRef(false);
@@ -256,11 +283,69 @@ export default function App() {
     });
 
     // 3. 실시간 클라우드 & 로컬 동기화 수신 구독 (웹소켓 알림 수신 시 즉시 재조회 및 반영)
-    const unsubscribeSync = realtimeSync.subscribe(({ payloadKey, data }) => {
+    const unsubscribeSync = realtimeSync.subscribe(({ payloadKey, data, source }) => {
       if (payloadKey === yearMonthKey && data) {
         isRemoteUpdating.current = true;
+
+        // 다른 기기나 탭에서 변경된 경우 알림 및 반짝임 효과 적용
+        const prevLessons = lessonsRef.current || {};
+        const newLessons = data.lessons || {};
+        const changedSlots = [];
+        let changeDesc = '';
+
+        // 새로 추가되거나 내용이 변경된 레슨 감지
+        Object.keys(newLessons).forEach((slot) => {
+          const prevL = prevLessons[slot];
+          const newL = newLessons[slot];
+          if (!prevL) {
+            changedSlots.push(slot);
+            if (!changeDesc) {
+              changeDesc = `'${newL.studentName}' (${newL.lessonType || '레슨'}) 일정이 새로 등록되었습니다.`;
+            }
+          } else if (JSON.stringify(prevL) !== JSON.stringify(newL)) {
+            changedSlots.push(slot);
+            if (!changeDesc) {
+              changeDesc = `'${newL.studentName}' 레슨 일정이 변경되었습니다.`;
+            }
+          }
+        });
+
+        // 삭제된 레슨 감지
+        if (changedSlots.length === 0) {
+          Object.keys(prevLessons).forEach((slot) => {
+            if (!newLessons[slot]) {
+              const removedL = prevLessons[slot];
+              if (!changeDesc) {
+                changeDesc = `'${removedL?.studentName || '레슨'}' 일정이 삭제되었습니다.`;
+              }
+            }
+          });
+        }
+
+        // 공지나 메모 변경 감지
+        if (!changeDesc && data.notice && data.notice !== notice) {
+          changeDesc = '스튜디오 공지사항이 변경되었습니다.';
+        }
+
+        // 1) 반짝임(하이라이트) 효과 적용: 변경된 슬롯 카드를 4.5초간 빛나게 함
+        if (changedSlots.length > 0) {
+          setHighlightedSlotKeys(changedSlots);
+          setTimeout(() => {
+            setHighlightedSlotKeys([]);
+          }, 4500);
+        }
+
+        // 2) 화면 토스트 팝업 알림 띄우기
+        if (changeDesc) {
+          addToast({
+            title: '실시간 일정 업데이트',
+            message: changeDesc,
+            type: 'lesson'
+          });
+        }
+
         setNotice(data.notice ?? '');
-        setLessons(data.lessons ?? {});
+        setLessons(newLessons);
         setMemoCards(data.memoCards ?? []);
         localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(data));
         setTimeout(() => { isRemoteUpdating.current = false; }, 100);
@@ -720,13 +805,14 @@ export default function App() {
         onSaveNotice={handleSaveNotice}
       />
 
-      {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 13:00~20:00 30분 슬롯 및 드래그앤드롭 이동) */}
+      {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 11:00~19:00 30분 슬롯 및 드래그앤드롭 이동) */}
       <TimetableGrid
         lessons={lessons}
         onSelectCell={(cellInfo) => setLessonModalCell(cellInfo)}
         onMoveLesson={handleMoveLesson}
         year={currentYear}
         month={currentMonth}
+        highlightedSlotKeys={highlightedSlotKeys}
       />
 
       {/* 4. 하단 동적 메모 카드 영역 (완전 편집 가능, 실시간 자동 공유) */}
@@ -777,6 +863,9 @@ export default function App() {
           />
         );
       })()}
+
+      {/* 5. 실시간 업데이트 토스트 알림 (다른 기기에서 일정 등록/수정 시 우측 상단 팝업) */}
+      <ToastNotification toasts={toasts} onDismiss={removeToast} />
     </div>
   );
 }

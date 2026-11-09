@@ -7,7 +7,8 @@ export default function TimetableGrid({
   onSelectCell,
   onMoveLesson,
   year,
-  month
+  month,
+  highlightedSlotKeys = []
 }) {
   const [draggedSlotKey, setDraggedSlotKey] = useState(null);
   const [dragOverSlotKey, setDragOverSlotKey] = useState(null);
@@ -143,10 +144,12 @@ export default function TimetableGrid({
                     const isDraggingThis = draggedSlotKey === slotKey;
                     const isDragTarget = dragOverSlotKey === slotKey && draggedSlotKey !== slotKey;
 
+                    const isHighlighted = highlightedSlotKeys?.includes(slotKey);
+
                     return (
                       <td
                         key={slotKey}
-                        className={`slot-cell ${isDragTarget ? 'slot-cell-drop-target' : ''} ${isDraggingThis ? 'slot-cell-dragging' : ''}`}
+                        className={`slot-cell ${isDragTarget ? 'slot-cell-drop-target' : ''} ${isDraggingThis ? 'slot-cell-dragging' : ''} ${isHighlighted ? 'slot-cell-highlighted' : ''}`}
                         onDragOver={(e) => handleDragOver(e, slotKey)}
                         onDragEnter={(e) => handleDragOver(e, slotKey)}
                         onDragLeave={(e) => handleDragLeave(e, slotKey)}
@@ -169,7 +172,7 @@ export default function TimetableGrid({
 
                             return (
                               <div 
-                                className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''}`}
+                                className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''} ${isHighlighted ? 'lesson-card-highlighted' : ''}`}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, slotKey)}
                                 onDragEnd={handleDragEnd}

@@ -1631,3 +1631,131 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+/* ===== 1. 실시간 토스트(Toast) 팝업 알림 스타일 ===== */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: calc(100% - 48px);
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 14px;
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.15), 0 4px 12px -2px rgba(13, 148, 136, 0.1);
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.25s ease;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.toast-icon-wrap {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 0.84rem;
+  color: #334155;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.toast-time {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+.toast-close-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.toast-close-btn:hover {
+  color: #334155;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ===== 4. 새로 변경된 레슨 카드 반짝임(하이라이트) 효과 ===== */
+.slot-cell-highlighted {
+  position: relative;
+  z-index: 5;
+}
+
+.lesson-card-highlighted {
+  animation: slotPulseHighlight 1.5s ease-in-out infinite alternate !important;
+  box-shadow: 0 0 0 3px #14B8A6, 0 8px 24px rgba(20, 184, 166, 0.45) !important;
+  transform: translateY(-2px) scale(1.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slotPulseHighlight {
+  0% {
+    box-shadow: 0 0 0 2px #0D9488, 0 4px 12px rgba(13, 148, 136, 0.3);
+    transform: scale(1.01);
+  }
+  50% {
+    box-shadow: 0 0 0 4px #2DD4BF, 0 8px 26px rgba(45, 212, 191, 0.55);
+    transform: scale(1.03);
+  }
+  100% {
+    box-shadow: 0 0 0 2px #0D9488, 0 4px 12px rgba(13, 148, 136, 0.3);
+    transform: scale(1.01);
+  }
+}
+
+
