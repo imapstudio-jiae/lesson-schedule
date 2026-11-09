@@ -33,3 +33,4 @@ export default function ToastNotification({ toasts = [], onDismiss }) {
     </div>
   );
 }
+
