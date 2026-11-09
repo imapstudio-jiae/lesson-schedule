@@ -27,6 +27,17 @@ export default function TimetableGrid({
     };
   };
 
+  // 시간표 카드에서 공간을 적게 차지하도록 수업 형태를 직관적으로 축약
+  const formatCompactLessonType = (type) => {
+    if (!type) return '';
+    if (type === '40분 정규 레슨') return '40분';
+    if (type === '1시간 정규 레슨') return '60분';
+    if (type === '성인 그룹 레슨') return '성인그룹';
+    if (type === '학생 그룹 레슨') return '학생그룹';
+    if (type === '학생 합주 레슨') return '합주';
+    return type;
+  };
+
 
   // 드래그 시작
   const handleDragStart = (e, slotKey) => {
@@ -195,19 +206,22 @@ export default function TimetableGrid({
                                     </span>
                                     {hasMemo && (
                                       <span className="card-memo-indicator" title={`작성된 메모: ${lesson.memo}`}>
-                                        <FileText size={12} />
+                                        <FileText size={11} />
                                       </span>
                                     )}
                                   </div>
-                                  <span 
-                                    className="lesson-type-badge" 
-                                    style={{ 
-                                      backgroundColor: style.badgeBg,
-                                      color: style.badgeText
-                                    }}
-                                  >
-                                    {lesson.lessonType}
-                                  </span>
+                                  {lesson.lessonType && (
+                                    <span 
+                                      className="lesson-type-badge" 
+                                      title={lesson.lessonType}
+                                      style={{ 
+                                        backgroundColor: style.badgeBg,
+                                        color: style.badgeText
+                                      }}
+                                    >
+                                      {formatCompactLessonType(lesson.lessonType)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             );

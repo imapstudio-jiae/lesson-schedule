@@ -846,19 +846,20 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   gap: 3px;
   min-width: 0;
-  flex: 1 1 0;
+  flex: 1 1 auto;
   overflow: hidden;
 }
 
 .student-name {
-  font-weight: 700;
-  font-size: 0.84rem;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: -0.03em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  line-height: 1.2;
 }
 
 .card-memo-indicator {
@@ -872,12 +873,19 @@ input:focus, textarea:focus, select:focus {
 }
 
 .lesson-type-badge {
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 1px 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 4px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 52px;
+  flex-shrink: 0;
+  line-height: 1.3;
+  opacity: 0.9;
+}
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 72px;
