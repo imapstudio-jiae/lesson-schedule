@@ -19,6 +19,7 @@ import {
 } from './constants';
 
 import { realtimeSync } from './realtimeSync';
+import { getSupabaseData, saveSupabaseData } from './supabase';
 
 export default function App() {
   // 현재 날짜 기준
@@ -160,7 +161,7 @@ export default function App() {
     };
   }, [getStorageKey, copyLessonsFromPrevMonth]);
 
-  // 데이터 변경 시 로컬 저장 + 실시간 클라우드 브로드캐스트 + Firestore 백엔드 자동 저장
+  // 데이터 변경 시 로컬 저장 + 실시간 클라우드 브로드캐스트 + Supabase/Firestore 클라우드 자동 저장
   const persistMonthData = useCallback(async (newNotice, newLessons, newCards) => {
     const dataToSave = {
       notice: newNotice,
@@ -175,7 +176,10 @@ export default function App() {
     // 2. 다른 사용자 및 탭으로 실시간 클라우드 자동 전파 (별도 설정 전혀 불필요)
     realtimeSync.broadcastUpdate(yearMonthKey, dataToSave);
 
-    // 3. Firestore 백엔드에도 백그라운드 자동 저장 시도
+    // 3. Supabase 클라우드 데이터베이스 영구 저장 (모든 기기 실시간 공유)
+    saveSupabaseData(yearMonthKey, dataToSave).catch(() => {});
+
+    // 4. Firestore 백엔드 백그라운드 자동 저장 시도
     saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave).catch(() => {});
   }, [yearMonthKey, studioId, getStorageKey]);
 
@@ -183,6 +187,7 @@ export default function App() {
   const persistStudentHistories = useCallback((newHistories) => {
     localStorage.setItem('music_studio_student_histories', JSON.stringify(newHistories));
     realtimeSync.broadcastUpdate('student_histories', newHistories);
+    saveSupabaseData('student_histories', newHistories).catch(() => {});
     saveMonthDataToFirestore(studioId, 'student_histories', newHistories).catch(() => {});
   }, [studioId]);
 
@@ -206,10 +211,51 @@ export default function App() {
       };
       localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(dataToSave));
       realtimeSync.broadcastUpdate(yearMonthKey, dataToSave);
+      saveSupabaseData(yearMonthKey, dataToSave).catch(() => {});
       saveMonthDataToFirestore(studioId, yearMonthKey, dataToSave).catch(() => {});
     }
 
-    // 2. 실시간 클라우드 & 로컬 동기화 수신 구독
+    // 2. Supabase 클라우드 실시간 데이터 확인 및 양방향 동기화
+    let isCancelled = false;
+    getSupabaseData(yearMonthKey).then((cloudData) => {
+      if (isCancelled) return;
+      if (cloudData && typeof cloudData === 'object' && Object.keys(cloudData).length > 0) {
+        // 클라우드에 최신 데이터가 존재하면 즉시 화면 및 로컬스토리지에 반영 (다른 기기 동기화)
+        isRemoteUpdating.current = true;
+        setNotice(cloudData.notice ?? '');
+        setLessons(cloudData.lessons ?? {});
+        setMemoCards(cloudData.memoCards ?? []);
+        localStorage.setItem(getStorageKey(yearMonthKey), JSON.stringify(cloudData));
+        setTimeout(() => { isRemoteUpdating.current = false; }, 100);
+      } else {
+        // 클라우드에 아직 데이터가 없는데 현재 기기에 기존 입력 데이터가 있다면, 최초 1회 클라우드로 자동 백업 업로드!
+        const localRaw = localStorage.getItem(getStorageKey(yearMonthKey));
+        if (localRaw) {
+          try {
+            const localData = JSON.parse(localRaw);
+            saveSupabaseData(yearMonthKey, localData).catch(() => {});
+          } catch (e) {}
+        }
+      }
+    });
+
+    // 학생별 진도 이력도 클라우드와 양방향 동기화
+    getSupabaseData('student_histories').then((cloudHistories) => {
+      if (isCancelled) return;
+      if (cloudHistories && typeof cloudHistories === 'object') {
+        setStudentHistories(cloudHistories);
+        localStorage.setItem('music_studio_student_histories', JSON.stringify(cloudHistories));
+      } else {
+        const localHist = localStorage.getItem('music_studio_student_histories');
+        if (localHist) {
+          try {
+            saveSupabaseData('student_histories', JSON.parse(localHist)).catch(() => {});
+          } catch (e) {}
+        }
+      }
+    });
+
+    // 3. 실시간 클라우드 & 로컬 동기화 수신 구독 (웹소켓 알림 수신 시 즉시 재조회 및 반영)
     const unsubscribeSync = realtimeSync.subscribe(({ payloadKey, data }) => {
       if (payloadKey === yearMonthKey && data) {
         isRemoteUpdating.current = true;
@@ -258,6 +304,7 @@ export default function App() {
     } catch (e) {}
 
     return () => {
+      isCancelled = true;
       if (unsubscribeSync) unsubscribeSync();
       if (unsubscribeFirestore) unsubscribeFirestore();
       if (unsubscribeHistoriesFirestore) unsubscribeHistoriesFirestore();
