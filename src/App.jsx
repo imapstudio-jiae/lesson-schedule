@@ -156,7 +156,7 @@ export default function App() {
 
     return {
       notice: getDefaultNotice(ymLabel),
-      lessons: hasCarriedLessons ? carriedLessons : (ym === '2026-10' ? getDefaultLessons() : {}),
+      lessons: hasCarriedLessons ? carriedLessons : {},
       memoCards: getDefaultMemoCards()
     };
   }, [getStorageKey, copyLessonsFromPrevMonth]);
