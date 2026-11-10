@@ -746,6 +746,8 @@ input:focus, textarea:focus, select:focus {
   text-align: left;
   cursor: grab;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   min-width: 0;
 }
 

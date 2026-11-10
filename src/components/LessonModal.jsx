@@ -13,7 +13,7 @@ import {
   Copy, 
   Calendar 
 } from 'lucide-react';
-import { LESSON_TYPES, COLOR_PALETTES } from '../constants';
+import { LESSON_TYPES, COLOR_PALETTES, DAYS_OF_WEEK, TIME_SLOTS } from '../constants';
 
 export default function LessonModal({
   isOpen,
@@ -30,11 +30,16 @@ export default function LessonModal({
   const [color, setColor] = useState('orange');
   const [memo, setMemo] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [targetDay, setTargetDay] = useState('mon');
+  const [targetTime, setTargetTime] = useState('11:00');
 
   const existingLesson = cellInfo?.lesson ?? null;
 
   useEffect(() => {
     if (!isOpen || !cellInfo) return;
+
+    setTargetDay(cellInfo.dayKey || 'mon');
+    setTargetTime(cellInfo.time || '11:00');
 
     if (existingLesson) {
       setStudentName(existingLesson.studentName || '');
@@ -75,17 +80,22 @@ export default function LessonModal({
       ? (customType.trim() || '직접 입력 레슨') 
       : lessonType;
 
+    const targetSlotKey = `${targetDay}-${targetTime}`;
     const lessonData = {
       id: existingLesson?.id || `lesson-${Date.now()}`,
       studentName: trimmedName,
       lessonType: finalType,
       color,
       memo: memo.trim(),
-      day: cellInfo.dayKey,
-      time: cellInfo.time,
+      day: targetDay,
+      time: targetTime,
     };
 
-    onSaveLesson(cellInfo.slotKey, lessonData);
+    // 다른 요일이나 시간으로 변경한 경우: 기존 위치에서 삭제 후 새 위치로 이동 저장
+    if (existingLesson && targetSlotKey !== cellInfo.slotKey) {
+      onDeleteLesson(cellInfo.slotKey, existingLesson.id);
+    }
+    onSaveLesson(targetSlotKey, lessonData);
     onClose();
   };
 
@@ -133,20 +143,64 @@ export default function LessonModal({
           </button>
         </div>
 
-        {/* 요일 및 시간대 안내 */}
+        {/* 요일 및 시간대 선택 (모바일/PC 모두 터치 한 번으로 원하는 시간대로 즉시 이동 가능) */}
         <div style={{ 
           background: 'var(--color-primary-subtle)', 
           padding: '10px 14px', 
           borderRadius: 'var(--radius-sm)',
-          fontSize: '0.88rem',
-          color: 'var(--color-primary)',
-          fontWeight: '600',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
           gap: '8px'
         }}>
-          <Clock size={16} />
-          <span>{cellInfo.dayLabel} {cellInfo.time} 타임</span>
+          <div style={{
+            fontSize: '0.84rem',
+            color: 'var(--color-primary)',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <Clock size={15} />
+            <span>수업 요일 및 시간 {existingLesson ? '(변경 시 해당 위치로 자동 이동)' : ''}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <select
+              value={targetDay}
+              onChange={(e) => setTargetDay(e.target.value)}
+              style={{
+                padding: '7px 10px',
+                borderRadius: '6px',
+                border: '1px solid rgba(13, 148, 136, 0.3)',
+                background: '#FFFFFF',
+                fontWeight: '600',
+                fontSize: '0.86rem',
+                color: '#0F172A'
+              }}
+            >
+              {DAYS_OF_WEEK.map((d) => (
+                <option key={d.key} value={d.key}>{d.label}</option>
+              ))}
+            </select>
+
+            <select
+              value={targetTime}
+              onChange={(e) => setTargetTime(e.target.value)}
+              style={{
+                padding: '7px 10px',
+                borderRadius: '6px',
+                border: '1px solid rgba(13, 148, 136, 0.3)',
+                background: '#FFFFFF',
+                fontWeight: '600',
+                fontSize: '0.86rem',
+                color: '#0F172A'
+              }}
+            >
+              {TIME_SLOTS.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

@@ -93,6 +93,87 @@ export default function TimetableGrid({
     }, 120);
   };
 
+  // ===== 스마트폰 모바일 터치 드래그 앤 드롭 지원 =====
+  const touchTimerRef = useRef(null);
+  const touchStartPosRef = useRef({ x: 0, y: 0 });
+  const isTouchDraggingRef = useRef(false);
+  const touchSlotSourceRef = useRef(null);
+
+  const handleTouchStart = (e, slotKey) => {
+    const touch = e.touches[0];
+    touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+    touchSlotSourceRef.current = slotKey;
+    isTouchDraggingRef.current = false;
+
+    // 180ms 동안 누르고 있으면 드래그 모드 활성화 (단순 탭과 구분)
+    touchTimerRef.current = setTimeout(() => {
+      isTouchDraggingRef.current = true;
+      isDraggingRef.current = true;
+      setDraggedSlotKey(slotKey);
+      if (navigator.vibrate) {
+        try { navigator.vibrate(35); } catch (err) {}
+      }
+    }, 180);
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+
+    // 아직 드래그 모드가 아닌 상태에서 손가락이 10px 이상 움직이면 일반 화면 스크롤 허용
+    if (!isTouchDraggingRef.current) {
+      if (dx > 10 || dy > 10) {
+        clearTimeout(touchTimerRef.current);
+      }
+      return;
+    }
+
+    // 드래그 모드 활성화 시 화면 스크롤 방지
+    if (e.cancelable) e.preventDefault();
+
+    // 현재 손가락 위치에 있는 셀 탐색
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const slotCell = targetEl?.closest('.slot-cell');
+    if (slotCell) {
+      const overKey = slotCell.getAttribute('data-slot-key');
+      if (overKey && overKey !== dragOverSlotKey) {
+        setDragOverSlotKey(overKey);
+      }
+    } else {
+      setDragOverSlotKey(null);
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    clearTimeout(touchTimerRef.current);
+
+    if (isTouchDraggingRef.current && touchSlotSourceRef.current) {
+      const touch = e.changedTouches[0];
+      const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+      const slotCell = targetEl?.closest('.slot-cell');
+
+      if (slotCell) {
+        const targetSlotKey = slotCell.getAttribute('data-slot-key');
+        const targetDayKey = slotCell.getAttribute('data-day-key');
+        const targetTime = slotCell.getAttribute('data-time');
+
+        if (targetSlotKey && targetSlotKey !== touchSlotSourceRef.current && onMoveLesson) {
+          onMoveLesson(touchSlotSourceRef.current, targetSlotKey, targetDayKey, targetTime);
+        }
+      }
+    }
+
+    setDraggedSlotKey(null);
+    setDragOverSlotKey(null);
+    touchSlotSourceRef.current = null;
+
+    setTimeout(() => {
+      isTouchDraggingRef.current = false;
+      isDraggingRef.current = false;
+    }, 120);
+  };
+
   return (
     <section className="timetable-section" aria-label="메인 레슨 시간표">
       {/* 시간표 헤더 상태 표시줄 */}
@@ -162,6 +243,9 @@ export default function TimetableGrid({
                     return (
                       <td
                         key={slotKey}
+                        data-slot-key={slotKey}
+                        data-day-key={day.key}
+                        data-time={time}
                         className={`slot-cell ${isDragTarget ? 'slot-cell-drop-target' : ''} ${isDraggingThis ? 'slot-cell-dragging' : ''} ${isHighlighted ? 'slot-cell-highlighted' : ''}`}
                         onDragOver={(e) => handleDragOver(e, slotKey)}
                         onDragEnter={(e) => handleDragOver(e, slotKey)}
@@ -189,6 +273,9 @@ export default function TimetableGrid({
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, slotKey)}
                                 onDragEnd={handleDragEnd}
+                                onTouchStart={(e) => handleTouchStart(e, slotKey)}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
                                 style={{
                                   backgroundColor: style.backgroundColor,
                                   borderColor: style.borderColor,
