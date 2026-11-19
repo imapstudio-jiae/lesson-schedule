@@ -451,6 +451,61 @@
 
 .fee-muted { color: #c9c4d6; }
 
+/* ── 2026년 10월 이하: 정산 기능 안내 카드 ── */
+.fee-cutoff {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #fff;
+  border-radius: 22px;
+  padding: 34px 30px 30px;
+  box-shadow: var(--fee-shadow);
+  max-width: 720px;
+  margin: 8px auto 0;
+}
+.fee-cutoff::after {
+  content: '';
+  position: absolute; right: -70px; top: -90px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(114, 87, 236, 0.10), rgba(103, 167, 246, 0.10));
+}
+.fee-cutoff-icon {
+  position: relative; z-index: 1;
+  width: 46px; height: 46px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 22px;
+  background: var(--fee-lav-soft);
+}
+.fee-cutoff-kicker {
+  position: relative; z-index: 1;
+  margin: 14px 0 0; font-size: 11.5px; font-weight: 800; letter-spacing: 0.02em;
+  color: var(--fee-lav-ink);
+}
+.fee-cutoff h3 {
+  position: relative; z-index: 1;
+  margin: 6px 0 0; font-size: 20px; font-weight: 800; letter-spacing: -0.03em;
+  color: var(--fee-ink); line-height: 1.35; word-break: keep-all;
+}
+.fee-cutoff-desc {
+  position: relative; z-index: 1;
+  margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: var(--fee-ink2); word-break: keep-all;
+}
+.fee-cutoff-desc b { color: var(--fee-lav-ink); }
+.fee-cutoff-list {
+  position: relative; z-index: 1;
+  margin: 16px 0 0; padding: 14px 16px 14px 30px;
+  background: #faf9ff; border: 1px solid #f0edfb; border-radius: 14px;
+  font-size: 12.5px; line-height: 1.7; color: #5f5878; word-break: keep-all;
+}
+.fee-cutoff-list li { margin: 0; }
+.fee-cutoff-list li + li { margin-top: 7px; }
+.fee-cutoff-list b { color: var(--fee-ink); }
+.fee-cutoff-actions {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 20px;
+}
+.fee-cutoff-actions .fee-btn { padding: 11px 18px; font-size: 13px; }
+
 /* ── 반응형 ── */
 @media (max-width: 1100px) {
   .fee-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -495,4 +550,10 @@
   .fee-modal { max-width: 100%; padding: 16px 14px 14px; }
   .fee-field-grid { grid-template-columns: 1fr; }
   .fee-kakao-text { max-height: 300px; }
+  .fee-cutoff { padding: 24px 18px 22px; border-radius: 18px; margin-top: 4px; }
+  .fee-cutoff h3 { font-size: 17px; }
+  .fee-cutoff-desc { font-size: 12.5px; }
+  .fee-cutoff-list { padding: 12px 14px 12px 26px; font-size: 12px; }
+  .fee-cutoff-actions { margin-top: 16px; }
+  .fee-cutoff-actions .fee-btn { width: 100%; justify-content: center; }
 }

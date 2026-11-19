@@ -298,7 +298,7 @@ function StudentModal({ mode, initial, onClose, onSave, onDelete }) {
   );
 }
 
-export default function FeePage({ year, month }) {
+function FeePageActive({ year, month }) {
   const ym = `${year}-${String(month).padStart(2, '0')}`;
   const storageKey = feeStorageKey(ym);
   const ymLabel = monthLabel(ym);
@@ -1162,4 +1162,51 @@ export default function FeePage({ year, month }) {
       {toast ? <div className="fee-toast">{toast}</div> : null}
     </section>
   );
+}
+
+// ── 정산 기능 시작 월 ──
+// 2026년 10월까지는 학생별 비율·예외 변동이 많아 앱에서 정산하지 않는다.
+// (입금 내역은 구글 시트 「2026년 1~10월 입금 내역」 탭에서 관리)
+export const FEE_START_YM = '2026-11';
+
+function FeeCutoffNotice({ ymLabel, onGoToMonth }) {
+  return (
+    <section className="fee-page">
+      <div className="fee-cutoff">
+        <div className="fee-cutoff-icon">💰</div>
+        <p className="fee-cutoff-kicker">레슨비 정산 · {monthLabel(FEE_START_YM)}부터</p>
+        <h3>2026년 11월부터 레슨비 정산 기능을 사용합니다</h3>
+        <p className="fee-cutoff-desc">
+          {ymLabel}까지는 학생별 비율과 예외가 많아 이 화면에서 정산 계산을 하지 않습니다.{' '}
+          {ymLabel} 입금 내역은 구글 시트 <b>「2026년 1~10월 입금 내역」</b> 탭에서 확인해 주세요.
+        </p>
+
+        <ul className="fee-cutoff-list">
+          <li><b>11월부터</b> 학생별 입금 상태·입금일과 배분, 추가·차감 항목을 이 화면에서 그대로 정리할 수 있어요.</li>
+          <li><b>1~10월</b> 기록은 구글 시트에 순수 입금 내역(건수·금액·학생별·입금일·상태)으로 남아 있어요.</li>
+        </ul>
+
+        <div className="fee-cutoff-actions">
+          <button
+            type="button"
+            className="fee-btn primary"
+            onClick={() => onGoToMonth && onGoToMonth(2026, 11)}
+          >
+            2026년 11월로 이동
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function FeePage({ year, month, onGoToMonth }) {
+  const ym = `${year}-${String(month).padStart(2, '0')}`;
+
+  // 2026년 10월 이하: 정산 계산·표시·편집 없이 안내 카드만 보여 준다.
+  if (ym < FEE_START_YM) {
+    return <FeeCutoffNotice ymLabel={monthLabel(ym)} onGoToMonth={onGoToMonth} />;
+  }
+
+  return <FeePageActive year={year} month={month} />;
 }

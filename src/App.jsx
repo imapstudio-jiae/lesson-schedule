@@ -804,7 +804,11 @@ export default function App() {
       />
 
       {activeTab === 'fees' ? (
-        <FeePage year={currentYear} month={currentMonth} />
+        <FeePage
+          year={currentYear}
+          month={currentMonth}
+          onGoToMonth={handleSelectYearMonth}
+        />
       ) : (
         <>
           {/* 2. 상단 운영 안내문 (수정 가능, 실시간 자동 공유) */}
