@@ -75,6 +75,15 @@ npm run build
 
 ---
 
+## 🔐 스튜디오 잠금 (비밀번호 게이트)
+
+- 앱을 열면 먼저 `🔒 IMAP Studio` 잠금 화면이 뜨고, 비밀번호를 맞혀야 시간표·레슨비 정산 화면이 나타납니다. 잠금 해제 전에는 시간표 데이터를 그리지 않고 Supabase/Firestore 조회도 하지 않습니다(`AppLockGate.jsx`가 `App` 자체를 마운트하지 않음).
+- 비밀번호는 코드에 평문으로 두지 않고 `src/lockAuth.js`의 `PASSWORD_SHA256` 해시와 비교합니다. 비밀번호를 바꾸려면 새 비밀번호의 SHA-256 값을 이 상수에 넣으면 됩니다.
+- 잠금 해제 상태는 브라우저 `localStorage`(`imap_studio_unlocked`)에 저장되어 같은 기기에서는 새로고침·재방문 시 다시 묻지 않고, 헤더 우측의 `🔒 잠금` 버튼으로 언제든 다시 잠글 수 있습니다.
+- 관련 파일: `src/lockAuth.js`, `src/AppLockGate.jsx`, `src/components/LockScreen.jsx`, `src/lock.css`
+
+---
+
 ## 🔒 Firebase Firestore 실시간 연동 방법
 
 1. [Firebase Console](https://console.firebase.google.com/)에서 프로젝트 생성 후 웹 앱 (`</>`)을 등록합니다.
