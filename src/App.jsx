@@ -5,6 +5,7 @@ import TimetableGrid from './components/TimetableGrid';
 import LessonModal from './components/LessonModal';
 import MemoCardsSection from './components/MemoCardsSection';
 import MemoDetailModal from './components/MemoDetailModal';
+import FeePage from './components/FeePage';
 
 import { 
   getStoredStudioId, 
@@ -27,6 +28,9 @@ export default function App() {
   const initialDate = new Date();
   const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth() + 1);
+
+  // 상단 페이지 탭: 'schedule' (📅 시간표) | 'fees' (💰 레슨비 정산)
+  const [activeTab, setActiveTab] = useState('schedule');
 
   // 스튜디오 기본 정보
   const [studioId, setStudioId] = useState(getStoredStudioId());
@@ -795,40 +799,48 @@ export default function App() {
         studioTitle={studioTitle}
         onUpdateStudioTitle={handleUpdateStudioTitle}
         onLoadSampleData={handleLoadSampleData}
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
       />
 
-      {/* 2. 상단 운영 안내문 (수정 가능, 실시간 자동 공유) */}
-      <NoticeBanner
-        year={currentYear}
-        month={currentMonth}
-        noticeText={notice}
-        onSaveNotice={handleSaveNotice}
-      />
+      {activeTab === 'fees' ? (
+        <FeePage year={currentYear} month={currentMonth} />
+      ) : (
+        <>
+          {/* 2. 상단 운영 안내문 (수정 가능, 실시간 자동 공유) */}
+          <NoticeBanner
+            year={currentYear}
+            month={currentMonth}
+            noticeText={notice}
+            onSaveNotice={handleSaveNotice}
+          />
 
-      {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 11:00~19:00 30분 슬롯 및 드래그앤드롭 이동) */}
-      <TimetableGrid
-        lessons={lessons}
-        onSelectCell={(cellInfo) => setLessonModalCell(cellInfo)}
-        onMoveLesson={handleMoveLesson}
-        year={currentYear}
-        month={currentMonth}
-        highlightedSlotKeys={highlightedSlotKeys}
-      />
+          {/* 3. 메인 시간표 Grid (시간 + 월~토 7열, 11:00~19:00 30분 슬롯 및 드래그앤드롭 이동) */}
+          <TimetableGrid
+            lessons={lessons}
+            onSelectCell={(cellInfo) => setLessonModalCell(cellInfo)}
+            onMoveLesson={handleMoveLesson}
+            year={currentYear}
+            month={currentMonth}
+            highlightedSlotKeys={highlightedSlotKeys}
+          />
 
-      {/* 4. 하단 동적 메모 카드 영역 (완전 편집 가능, 실시간 자동 공유) */}
-      <MemoCardsSection
-        memoCards={memoCards}
-        onAddCard={handleAddMemoCard}
-        onDeleteCard={handleDeleteMemoCard}
-        onUpdateCardTitle={handleUpdateCardTitle}
-        onUpdateCardColor={handleUpdateCardColor}
-        onAddItemToCard={handleAddItemToCard}
-        onToggleItemCheck={handleToggleItemCheck}
-        onDeleteItemFromCard={handleDeleteItemFromCard}
-        onOpenDetailModal={(card, item = null) => setSelectedMemoDetail({ card, item })}
-        onReorderCards={handleReorderCards}
-        onReorderItems={handleReorderItems}
-      />
+          {/* 4. 하단 동적 메모 카드 영역 (완전 편집 가능, 실시간 자동 공유) */}
+          <MemoCardsSection
+            memoCards={memoCards}
+            onAddCard={handleAddMemoCard}
+            onDeleteCard={handleDeleteMemoCard}
+            onUpdateCardTitle={handleUpdateCardTitle}
+            onUpdateCardColor={handleUpdateCardColor}
+            onAddItemToCard={handleAddItemToCard}
+            onToggleItemCheck={handleToggleItemCheck}
+            onDeleteItemFromCard={handleDeleteItemFromCard}
+            onOpenDetailModal={(card, item = null) => setSelectedMemoDetail({ card, item })}
+            onReorderCards={handleReorderCards}
+            onReorderItems={handleReorderItems}
+          />
+        </>
+      )}
 
       {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
       <LessonModal

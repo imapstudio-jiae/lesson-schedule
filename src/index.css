@@ -394,6 +394,69 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* 연월 컨트롤러 바 */
+/* ===== 상단 페이지 탭 (시간표 ↔ 레슨비 정산) ===== */
+.app-tab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.app-tab-track {
+  display: inline-flex;
+  gap: 4px;
+  background: #f5f3fb;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.app-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7a7492;
+}
+
+.app-tab .app-tab-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.app-tab:not(.active):hover {
+  color: #2d2944;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.app-tab.active {
+  background: #ffffff;
+  color: #5b41d6;
+  box-shadow: 0 3px 10px -4px rgba(80, 60, 150, 0.4);
+}
+
+.app-tab-note {
+  font-size: 11px;
+  color: #aca7bf;
+  word-break: keep-all;
+}
+
+@media (max-width: 640px) {
+  .app-tab-note {
+    display: none;
+  }
+  .app-tab-track {
+    width: 100%;
+  }
+  .app-tab {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
 .month-nav-bar {
   display: flex;
   align-items: center;
@@ -887,12 +950,6 @@ input:focus, textarea:focus, select:focus {
   flex-shrink: 2;
   line-height: 1.3;
   opacity: 0.9;
-}
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 72px;
-  flex-shrink: 0;
-  line-height: 1.4;
 }
 
 /* ===== 하단 동적 메모 카드 영역 ===== */

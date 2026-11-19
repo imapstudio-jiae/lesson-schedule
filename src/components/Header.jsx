@@ -103,7 +103,9 @@ export default function Header({
   studioTitle,
   onUpdateStudioTitle,
   syncStatus = 'online',
-  onLoadSampleData
+  onLoadSampleData,
+  activeTab = 'schedule',
+  onChangeTab
 }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState(studioTitle);
@@ -189,6 +191,33 @@ export default function Header({
         </div>
       </div>
 
+      {/* 상단 탭 전환: 📅 시간표 ↔ 💰 레슨비 정산 */}
+      <div className="app-tab-bar">
+        <div className="app-tab-track" role="tablist" aria-label="페이지 전환">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'schedule'}
+            className={`app-tab${activeTab === 'schedule' ? ' active' : ''}`}
+            onClick={() => onChangeTab && onChangeTab('schedule')}
+          >
+            <span className="app-tab-emoji">📅</span> 시간표
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'fees'}
+            className={`app-tab${activeTab === 'fees' ? ' active' : ''}`}
+            onClick={() => onChangeTab && onChangeTab('fees')}
+          >
+            <span className="app-tab-emoji">💰</span> 레슨비 정산
+          </button>
+        </div>
+        <span className="app-tab-note">
+          {activeTab === 'fees' ? '월별로 따로 저장 · 입금 상태·배분을 바로 고칠 수 있어요' : '레슨 일정과 메모는 그대로, 정산은 오른쪽 탭에서'}
+        </span>
+      </div>
+
       {/* 연월 네비게이터 & 빠른 이동 */}
       <div className="month-nav-bar">
         <div className="month-display-group">
@@ -202,7 +231,7 @@ export default function Header({
           </button>
 
           <h2 className="current-month-heading">
-            <span>{year}년 {month}월 레슨 일정</span>
+            <span>{year}년 {month}월 {activeTab === 'fees' ? '레슨비 정산' : '레슨 일정'}</span>
           </h2>
 
           <button 

@@ -1,0 +1,460 @@
+/* ===== 💰 레슨비 정산 페이지 (fee-) ===== */
+.fee-page {
+  --fee-ink: #2d2944;
+  --fee-ink2: #565070;
+  --fee-muted: #8b86a1;
+  --fee-line: #eceaf4;
+  --fee-coral: #ef6a45;
+  --fee-coral-ink: #c8552f;
+  --fee-coral-soft: #fff0ea;
+  --fee-mint: #17a58c;
+  --fee-mint-ink: #0e8a74;
+  --fee-mint-soft: #e4f8f2;
+  --fee-mint-line: #bdeadf;
+  --fee-lav: #7257ec;
+  --fee-lav-ink: #5b41d6;
+  --fee-lav-soft: #f0ebff;
+  --fee-lav-line: #ded4ff;
+  --fee-blue: #3b76d8;
+  --fee-blue-soft: #e9f1fe;
+  --fee-shadow: 0 14px 34px -18px rgba(60, 44, 110, 0.32), 0 2px 8px rgba(60, 44, 110, 0.05);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--fee-ink);
+  min-width: 0;
+}
+
+.fee-page *,
+.fee-page *::before,
+.fee-page *::after { box-sizing: border-box; }
+
+.fee-page button { font-family: inherit; }
+
+/* ── 요약 카드 ── */
+.fee-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+
+.fee-stat {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  padding: 15px 16px;
+  box-shadow: var(--fee-shadow);
+  min-width: 0;
+}
+.fee-stat-icon {
+  width: 28px; height: 28px; border-radius: 9px;
+  display: grid; place-items: center; font-size: 13px; margin-bottom: 9px;
+  background: #f3f1fb;
+}
+.fee-stat-icon.lav { background: var(--fee-lav-soft); }
+.fee-stat-icon.mint { background: var(--fee-mint-soft); }
+.fee-stat-icon.coral { background: var(--fee-coral-soft); }
+.fee-stat-label { font-size: 11.5px; font-weight: 700; color: var(--fee-muted); }
+.fee-stat-value {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.12;
+  margin-top: 3px; display: flex; align-items: baseline; gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.fee-stat-value .unit { font-size: 12.5px; font-weight: 700; color: var(--fee-muted); letter-spacing: 0; }
+.fee-stat-sub { font-size: 11px; color: var(--fee-muted); margin-top: 5px; line-height: 1.5; word-break: keep-all; }
+.fee-stat.primary {
+  background: linear-gradient(135deg, #8b6ff5 0%, #7a5cf0 46%, #67a7f6 100%);
+  border-color: transparent; color: #fff;
+}
+.fee-stat.primary .fee-stat-label,
+.fee-stat.primary .fee-stat-sub { color: rgba(255, 255, 255, 0.84); }
+.fee-stat.primary .fee-stat-value .unit { color: rgba(255, 255, 255, 0.8); }
+.fee-stat.primary .fee-stat-icon { background: rgba(255, 255, 255, 0.2); }
+.fee-stat.primary::after {
+  content: ''; position: absolute; right: -34px; top: -44px;
+  width: 130px; height: 130px; border-radius: 50%; background: rgba(255, 255, 255, 0.14);
+}
+.fee-mini-bar { height: 5px; border-radius: 99px; background: #f0eef8; margin-top: 9px; overflow: hidden; }
+.fee-mini-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3ed0b5, #0f9f87); transition: width 0.3s; }
+
+/* ── 안내 띠 ── */
+.fee-notice {
+  background: linear-gradient(180deg, #fffaf6, #fff6f0);
+  border: 1px solid #ffe3d5; border-left: 4px solid #f7916d;
+  border-radius: 16px; padding: 13px 16px 14px;
+  box-shadow: 0 12px 26px -24px rgba(200, 90, 50, 0.8);
+}
+.fee-notice-title { font-size: 12.5px; font-weight: 800; color: #d1603c; display: flex; align-items: center; gap: 6px; }
+.fee-notice p { margin: 6px 0 0; font-size: 12px; color: #7d6459; line-height: 1.65; word-break: keep-all; overflow-wrap: break-word; }
+.fee-notice b { color: #c8552f; }
+
+/* ── 카드 공통 ── */
+.fee-card {
+  background: #fff;
+  border: 1px solid #fff;
+  border-radius: 22px;
+  box-shadow: var(--fee-shadow);
+  padding: 16px 18px;
+  min-width: 0;
+}
+.fee-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.fee-card-head h3 {
+  margin: 0; font-size: 14.5px; font-weight: 800; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 7px; color: var(--fee-ink);
+}
+.fee-hint {
+  font-size: 11.5px; font-weight: 700; color: var(--fee-muted);
+  background: #f7f6fc; border-radius: 999px; padding: 3px 9px;
+}
+.fee-legend { font-size: 11px; color: var(--fee-muted); }
+
+/* ── 단가 기준 ── */
+.fee-rate-box { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 13px; }
+.fee-rb-label { font-size: 11px; font-weight: 800; color: #a9a3bd; letter-spacing: 0.02em; margin-right: 2px; }
+.fee-rate-chip {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  background: #f8f7fd; border: 1px solid #ece8fa; border-radius: 10px; padding: 5px 9px;
+}
+.fee-rate-chip span { font-size: 11px; font-weight: 700; color: #7a7492; }
+.fee-rate-chip b { font-size: 12px; font-weight: 800; color: var(--fee-lav-ink); font-variant-numeric: tabular-nums; }
+.fee-rb-note { font-size: 10.5px; color: #aca7bf; margin-left: 2px; }
+
+/* ── 툴바 ── */
+.fee-tool-row {
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 12px; padding-bottom: 13px; border-bottom: 1px dashed var(--fee-line);
+}
+.fee-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.fee-chip {
+  font: inherit; font-size: 12.5px; font-weight: 700; color: #6b6584;
+  background: #f7f6fc; border: 1px solid transparent; border-radius: 999px;
+  padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px;
+}
+.fee-chip b { font-weight: 800; color: #a9a3bd; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.fee-chip:hover { background: #f2f0fb; }
+.fee-chip.active { background: var(--fee-lav-soft); border-color: var(--fee-lav-line); color: var(--fee-lav-ink); }
+.fee-chip.active b { color: var(--fee-lav); }
+
+.fee-tool-right { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.fee-search {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f9f8fd; border: 1px solid var(--fee-line); border-radius: 10px;
+  padding: 0 10px; height: 36px; color: #9a95ad;
+}
+.fee-search:focus-within { border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.1); background: #fff; }
+.fee-search input {
+  border: 0; background: transparent; outline: none; padding: 0;
+  font-size: 12.5px; width: 150px; color: var(--fee-ink); border-radius: 0; box-shadow: none;
+}
+.fee-search input:focus { border: 0; box-shadow: none; }
+.fee-search input::placeholder { color: #b4afc6; }
+
+.fee-btn {
+  font: inherit; font-size: 12.5px; font-weight: 800; border-radius: 10px;
+  padding: 9px 13px; border: 1px solid transparent;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.fee-btn.primary { background: linear-gradient(135deg, #8b6ff5, #6d4fe8); color: #fff; box-shadow: 0 10px 18px -12px rgba(114, 87, 236, 0.95); }
+.fee-btn.primary:hover { filter: brightness(1.05); }
+.fee-btn.green { background: linear-gradient(135deg, #26c1a5, #0fa389); color: #fff; box-shadow: 0 10px 18px -12px rgba(15, 163, 137, 0.95); }
+.fee-btn.green:hover { filter: brightness(1.04); }
+.fee-btn.outline { background: #fff; border-color: var(--fee-line); color: var(--fee-ink2); }
+.fee-btn.outline:hover { background: #f8f6ff; border-color: var(--fee-lav-line); color: var(--fee-lav-ink); }
+.fee-btn.ghost { background: #fff; border-color: var(--fee-line); color: var(--fee-ink2); }
+.fee-btn.danger { background: #fff5f2; border-color: #ffd9cb; color: var(--fee-coral-ink); }
+.fee-btn.danger.confirming { background: #ef6a45; border-color: #ef6a45; color: #fff; }
+.fee-btn.small { padding: 7px 10px; font-size: 12px; }
+.fee-btn.wide { width: 100%; justify-content: center; margin-top: 10px; }
+
+.fee-icon-btn {
+  width: 28px; height: 28px; border-radius: 9px; border: 1px solid var(--fee-line);
+  background: #fff; color: var(--fee-ink2); display: inline-grid; place-items: center; padding: 0;
+}
+.fee-icon-btn:hover { background: #f8f6ff; border-color: var(--fee-lav-line); color: var(--fee-lav-ink); }
+.fee-icon-btn.danger { color: #c0b9cd; }
+.fee-icon-btn.danger:hover { background: #fff5f2; border-color: #ffd9cb; color: var(--fee-coral-ink); }
+
+/* ── 표 ── */
+.fee-table-wrap {
+  overflow-x: auto; border-radius: 14px; border: 1px solid var(--fee-line); max-width: 100%;
+}
+.fee-table { width: 100%; border-collapse: collapse; min-width: 1020px; font-size: 12.5px; }
+.fee-table thead th {
+  background: #faf9fe; font-size: 11.5px; font-weight: 800; color: #8b86a1;
+  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--fee-line); white-space: nowrap;
+}
+.fee-table thead th.fee-col-rate { text-align: right; padding-right: 20px; }
+.fee-table tbody td { padding: 9px 12px; border-bottom: 1px solid #f4f2fa; vertical-align: middle; color: var(--fee-ink2); }
+.fee-table tbody tr:hover { background: #fbfaff; }
+.fee-table tbody tr:last-child td { border-bottom: 0; }
+.fee-table .fee-col-no { width: 38px; color: #bdb8cd; font-size: 11px; font-variant-numeric: tabular-nums; }
+.fee-table .fee-cell-name b { font-size: 13px; font-weight: 800; color: var(--fee-ink); letter-spacing: -0.01em; }
+.fee-table .fee-col-rate { text-align: right; }
+.fee-table .fee-cell-memo {
+  max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #7c7694; font-size: 11.5px;
+}
+.fee-table .fee-col-manage { width: 54px; }
+.fee-table tfoot td { padding: 10px 12px; background: #fbfaff; border-top: 1px solid var(--fee-line); font-size: 12px; font-weight: 800; color: var(--fee-ink2); }
+.fee-table .fee-foot-label { text-align: right; color: #8b86a1; }
+.fee-table .fee-foot-amount { font-variant-numeric: tabular-nums; color: var(--fee-ink); }
+.fee-empty { text-align: center; color: var(--fee-muted); padding: 24px 12px; font-size: 12.5px; }
+
+/* 요일·시간 */
+.fee-times { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.fee-time { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--fee-ink2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fee-time + .fee-time::before { content: '·'; color: #cfcadd; margin-right: 2px; }
+.fee-day {
+  display: inline-grid; place-items: center; width: 18px; height: 18px;
+  border-radius: 6px; background: var(--fee-lav-soft); color: var(--fee-lav-ink);
+  font-size: 10.5px; font-weight: 800;
+}
+.fee-day.weekend { background: var(--fee-blue-soft); color: var(--fee-blue); }
+.fee-time-text { font-size: 12px; color: var(--fee-ink2); }
+
+/* 배지 */
+.fee-badge {
+  display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: -0.01em;
+  padding: 2px 8px; border-radius: 999px; background: var(--fee-lav-soft); color: var(--fee-lav-ink);
+  white-space: nowrap;
+}
+.fee-badge.form.m40 { background: var(--fee-mint-soft); color: var(--fee-mint-ink); }
+.fee-badge.form.reserve { background: var(--fee-coral-soft); color: var(--fee-coral-ink); }
+.fee-form-sub { display: block; font-size: 10.5px; font-weight: 700; color: #a9a3bd; margin-top: 3px; }
+
+/* 레슨비 입력 */
+.fee-rate { display: inline-flex; align-items: baseline; gap: 3px; justify-content: flex-end; }
+.fee-rate input {
+  width: 88px; text-align: right; padding: 5px 7px; border: 1px solid transparent;
+  border-radius: 8px; background: #faf9fe; color: var(--fee-ink);
+  font-size: 12.5px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.fee-rate input:hover { background: #f4f1fe; }
+.fee-rate input:focus { background: #fff; border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+.fee-rate > span { font-size: 11px; font-weight: 700; color: var(--fee-muted); }
+
+/* 입금 상태 */
+.fee-status {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800;
+  border-radius: 999px; padding: 5px 10px; border: 1px solid transparent; white-space: nowrap;
+}
+.fee-status .fee-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.75; }
+.fee-status.unpaid { background: var(--fee-coral-soft); color: var(--fee-coral-ink); border-color: #ffd9cb; }
+.fee-status.paid { background: var(--fee-mint-soft); color: var(--fee-mint-ink); border-color: var(--fee-mint-line); }
+.fee-status.exempt { background: #f4f2fa; color: #8b86a1; border-color: #e8e5f2; }
+.fee-status:hover { filter: brightness(0.98); transform: translateY(-1px); }
+
+.fee-cell-date { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--fee-ink2); }
+.fee-cell-date.none { color: #c9c4d6; }
+.fee-date-input {
+  width: 128px; padding: 4px 6px; font-size: 11.5px; border-radius: 8px;
+  border: 1px solid var(--fee-line); background: #fff; color: var(--fee-ink2);
+  font-variant-numeric: tabular-nums;
+}
+.fee-date-input:focus { border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+
+/* ── 모바일 카드 (데스크톱에서는 숨김) ── */
+.fee-mobile-list { display: none; }
+
+/* ── 하단 정산 ── */
+.fee-bottom { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+
+.fee-pay-lines { display: flex; flex-direction: column; gap: 1px; }
+.fee-pay-line {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 8px 10px; border-radius: 10px; font-size: 12.5px; color: var(--fee-ink2);
+}
+.fee-pay-line:nth-child(odd) { background: #fbfaff; }
+.fee-pay-line span { font-weight: 700; }
+.fee-pay-line small { font-size: 10.5px; font-weight: 700; color: #a9a3bd; margin-left: 4px; }
+.fee-pay-line b { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--fee-ink); }
+.fee-pay-line.paid b { color: var(--fee-mint-ink); }
+.fee-pay-line.unpaid b { color: var(--fee-coral-ink); }
+.fee-pay-line.extra b { color: var(--fee-lav-ink); }
+.fee-pay-line.grand { background: #f4f1fe; border: 1px solid var(--fee-lav-line); margin-top: 4px; }
+.fee-pay-line.grand span { color: var(--fee-lav-ink); font-weight: 800; }
+.fee-pay-line.grand b { font-size: 15px; color: var(--fee-lav-ink); }
+
+.fee-progress { height: 6px; border-radius: 99px; background: #f0eef8; margin: 12px 0 4px; overflow: hidden; }
+.fee-progress i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3ed0b5, #0f9f87); transition: width 0.35s; }
+
+.fee-split { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--fee-line); }
+.fee-split-head { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 800; color: #a9a3bd; }
+.fee-tip { font-weight: 700; color: var(--fee-muted); }
+.fee-split-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f4f2fa; }
+.fee-who { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800; color: var(--fee-ink); flex-wrap: wrap; }
+.fee-avatar { width: 24px; height: 24px; border-radius: 8px; display: inline-grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; }
+.fee-avatar.jiae { background: linear-gradient(135deg, #8b6ff5, #67a7f6); }
+.fee-avatar.inung { background: linear-gradient(135deg, #24c0a2, #0e8a74); }
+.fee-ratio-wrap { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; font-weight: 700; color: var(--fee-muted); }
+.fee-ratio-input {
+  width: 46px; text-align: center; padding: 3px 4px; border-radius: 8px;
+  border: 1px solid var(--fee-line); background: #faf9fe; font-size: 12px; font-weight: 800;
+  color: var(--fee-lav-ink); font-variant-numeric: tabular-nums;
+}
+.fee-ratio-input:focus { background: #fff; border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+.fee-ratio-fixed { font-size: 11.5px; font-weight: 700; color: #a9a3bd; }
+.fee-split-amt { text-align: right; }
+.fee-split-amt b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; color: var(--fee-ink); font-variant-numeric: tabular-nums; }
+.fee-split-amt small { font-size: 10.5px; color: var(--fee-muted); line-height: 1.5; }
+
+/* 추가 정산 */
+.fee-extra { margin-top: 12px; background: #fbfaff; border: 1px solid var(--fee-lav-line); border-radius: 14px; padding: 12px; }
+.fee-extra-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; color: var(--fee-lav-ink); }
+.fee-extra-title em { font-style: normal; font-size: 10.5px; font-weight: 700; color: #a9a3bd; margin-left: 4px; }
+.fee-tag { font-size: 10px; font-weight: 800; background: #fff; border: 1px solid var(--fee-lav-line); color: var(--fee-lav); border-radius: 999px; padding: 2px 7px; white-space: nowrap; }
+.fee-extra-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px dashed #ece8fa; font-size: 12px; color: var(--fee-ink2);
+}
+.fee-extra-row:last-child { border-bottom: 0; }
+.fee-extra-row > span { font-weight: 700; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fee-extra-row em { font-style: normal; font-size: 10.5px; color: #a9a3bd; font-weight: 700; }
+.fee-extra-row b { font-weight: 800; color: var(--fee-ink); font-variant-numeric: tabular-nums; }
+.fee-extra-row.sub { color: var(--fee-muted); }
+.fee-extra-row.sum { border-top: 1px solid var(--fee-lav-line); border-bottom: 0; margin-top: 4px; padding-top: 9px; color: var(--fee-lav-ink); font-weight: 800; }
+.fee-extra-row.sum b { color: var(--fee-lav-ink); }
+
+.fee-money-input { display: inline-flex; align-items: center; gap: 3px; }
+.fee-money-input input {
+  width: 84px; text-align: right; padding: 5px 7px; border-radius: 8px;
+  border: 1px solid var(--fee-line); background: #fff; font-size: 12px; font-weight: 800;
+  color: var(--fee-ink); font-variant-numeric: tabular-nums;
+}
+.fee-money-input input:focus { border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+.fee-money-input > span { font-size: 10.5px; font-weight: 700; color: var(--fee-muted); white-space: nowrap; }
+
+.fee-mode-toggle {
+  font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 8px;
+  border: 1px solid var(--fee-line); background: #fff; color: #a9a3bd;
+}
+.fee-mode-toggle.on { background: var(--fee-mint-soft); border-color: var(--fee-mint-line); color: var(--fee-mint-ink); }
+
+/* 추가/차감 항목 */
+.fee-item-list { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 8px; }
+.fee-item-row, .fee-item-add { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.fee-item-add { padding-top: 8px; border-top: 1px dashed #ece8fa; }
+.fee-item-label {
+  flex: 1 1 130px; min-width: 0; padding: 6px 8px; border-radius: 8px;
+  border: 1px solid var(--fee-line); background: #fff; font-size: 11.5px; color: var(--fee-ink);
+}
+.fee-item-label:focus { border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+.fee-item-target, .fee-item-sign {
+  padding: 6px 6px; border-radius: 8px; border: 1px solid var(--fee-line); background: #fff;
+  font-size: 11.5px; font-weight: 700; color: var(--fee-ink2);
+}
+.fee-item-target:focus, .fee-item-sign:focus { border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12); }
+.fee-sign-btn {
+  font-size: 10.5px; font-weight: 800; border-radius: 999px; padding: 4px 8px;
+  border: 1px solid var(--fee-line); background: #fff; white-space: nowrap;
+}
+.fee-sign-btn.minus { background: #fff5f2; border-color: #ffd9cb; color: var(--fee-coral-ink); }
+.fee-sign-btn.plus { background: var(--fee-mint-soft); border-color: var(--fee-mint-line); color: var(--fee-mint-ink); }
+
+/* 최종 */
+.fee-final {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 14px; padding: 13px 14px; border-radius: 16px;
+  background: linear-gradient(135deg, #f4f1ff, #eef7ff); border: 1px solid var(--fee-lav-line);
+}
+.fee-final-label { font-size: 12px; font-weight: 800; color: var(--fee-lav-ink); }
+.fee-final-amounts { display: flex; gap: 16px; flex-wrap: wrap; }
+.fee-final-amounts span { font-size: 11px; font-weight: 700; color: var(--fee-muted); display: flex; flex-direction: column; align-items: flex-end; }
+.fee-final-amounts b { font-size: 16px; font-weight: 800; color: var(--fee-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.fee-split-foot { margin-top: 9px; font-size: 10.5px; color: #a9a3bd; line-height: 1.55; word-break: keep-all; }
+
+/* ── 카톡 문구 ── */
+.fee-seg { display: inline-flex; background: #f5f3fb; border-radius: 10px; padding: 3px; gap: 3px; }
+.fee-seg button { font-size: 11.5px; font-weight: 800; color: #7a7492; padding: 6px 10px; border-radius: 8px; }
+.fee-seg button.on { background: #fff; color: var(--fee-lav-ink); box-shadow: 0 3px 10px -4px rgba(80, 60, 150, 0.4); }
+.fee-kakao-text {
+  margin: 0; padding: 13px 14px; border-radius: 14px; background: #faf9fe; border: 1px solid var(--fee-line);
+  font-family: inherit; font-size: 12px; line-height: 1.7; color: var(--fee-ink2);
+  white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow: auto;
+}
+.fee-kakao-foot { margin: 9px 2px 0; font-size: 10.5px; color: #a9a3bd; text-align: center; }
+
+/* ── 모달 ── */
+.fee-modal-overlay {
+  position: fixed; inset: 0; z-index: 1200; background: rgba(35, 28, 66, 0.42);
+  backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.fee-modal {
+  width: 100%; max-width: 480px; max-height: 90vh; overflow: auto;
+  background: #fff; border-radius: 20px; box-shadow: 0 30px 60px -20px rgba(35, 28, 66, 0.5);
+  padding: 18px 18px 16px;
+}
+.fee-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.fee-modal-head h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--fee-ink); }
+.fee-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fee-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.fee-field-wide { grid-column: 1 / -1; }
+.fee-field > span { font-size: 11px; font-weight: 800; color: var(--fee-muted); }
+.fee-field input, .fee-field select, .fee-field textarea {
+  width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--fee-line);
+  background: #fff; font-size: 12.5px; color: var(--fee-ink);
+}
+.fee-field input:focus, .fee-field select:focus, .fee-field textarea:focus {
+  border-color: var(--fee-lav-line); box-shadow: 0 0 0 3px rgba(114, 87, 236, 0.12);
+}
+.fee-field textarea { resize: vertical; line-height: 1.55; }
+.fee-modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.fee-modal-actions { display: flex; gap: 7px; }
+
+/* ── 토스트 ── */
+.fee-toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 1400;
+  background: #2d2944; color: #fff; font-size: 12.5px; font-weight: 700;
+  padding: 10px 16px; border-radius: 999px; box-shadow: 0 16px 30px -12px rgba(35, 28, 66, 0.6);
+  animation: feeToastIn 0.18s ease-out;
+  max-width: calc(100vw - 32px); text-align: center;
+}
+@keyframes feeToastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.fee-muted { color: #c9c4d6; }
+
+/* ── 반응형 ── */
+@media (max-width: 1100px) {
+  .fee-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fee-bottom { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .fee-page { gap: 12px; }
+  .fee-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .fee-stat { padding: 12px 12px 13px; border-radius: 16px; }
+  .fee-stat-value { font-size: 21px; }
+  .fee-stat.primary { grid-column: span 2; }
+  .fee-card { padding: 13px 13px 14px; border-radius: 18px; }
+  .fee-table-wrap { display: none; }
+  .fee-mobile-list { display: flex; flex-direction: column; gap: 9px; }
+  .fee-student-card {
+    border: 1px solid var(--fee-line); border-radius: 14px; padding: 11px 12px; background: #fff;
+  }
+  .fee-student-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .fee-student-top b { font-size: 13.5px; font-weight: 800; color: var(--fee-ink); }
+  .fee-student-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .fee-student-meta .fee-form-sub { display: inline; margin-top: 0; }
+  .fee-student-times { margin-top: 6px; font-size: 11.5px; }
+  .fee-student-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 9px; }
+  .fee-student-bottom .fee-rate { flex: 1; justify-content: flex-start; }
+  .fee-student-bottom .fee-rate input { width: 96px; text-align: left; }
+  .fee-student-date { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; font-weight: 700; color: var(--fee-muted); }
+  .fee-student-memo { margin: 8px 0 0; font-size: 11px; color: #7c7694; line-height: 1.5; word-break: keep-all; }
+  .fee-mobile-total { text-align: right; font-size: 12px; font-weight: 800; color: var(--fee-muted); padding: 6px 2px 0; }
+  .fee-mobile-total b { color: var(--fee-ink); font-variant-numeric: tabular-nums; }
+  .fee-tool-right { width: 100%; }
+  .fee-search { flex: 1 1 100%; }
+  .fee-search input { width: 100%; }
+  .fee-tool-right .fee-btn { flex: 1 1 auto; justify-content: center; }
+  .fee-legend { display: none; }
+  .fee-final { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .fee-final-amounts { width: 100%; justify-content: space-between; }
+  .fee-final-amounts b { font-size: 15px; }
+  .fee-item-row .fee-item-label, .fee-item-add .fee-item-label { flex: 1 1 100%; }
+  .fee-modal { max-width: 100%; padding: 16px 14px 14px; }
+  .fee-field-grid { grid-template-columns: 1fr; }
+  .fee-kakao-text { max-height: 260px; }
+}
