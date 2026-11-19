@@ -23,7 +23,7 @@ import { realtimeSync } from './realtimeSync';
 import { getSupabaseData, saveSupabaseData } from './supabase';
 import ToastNotification from './components/ToastNotification';
 
-export default function App() {
+export default function App({ onLock }) {
   // 현재 날짜 기준
   const initialDate = new Date();
   const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
@@ -801,6 +801,7 @@ export default function App() {
         onLoadSampleData={handleLoadSampleData}
         activeTab={activeTab}
         onChangeTab={setActiveTab}
+        onLock={onLock}
       />
 
       {activeTab === 'fees' ? (

@@ -105,7 +105,8 @@ export default function Header({
   syncStatus = 'online',
   onLoadSampleData,
   activeTab = 'schedule',
-  onChangeTab
+  onChangeTab,
+  onLock
 }) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState(studioTitle);
@@ -188,6 +189,19 @@ export default function Header({
             <Printer size={15} />
             <span>인쇄 / PDF</span>
           </button>
+
+          {/* 다시 잠그기: 잠금 화면으로 돌아가며 이 기기의 잠금 해제 상태를 지웁니다 */}
+          {onLock && (
+            <button
+              className="btn-pill lock-header-btn"
+              onClick={onLock}
+              title="시간표를 다시 잠급니다"
+              aria-label="잠금"
+            >
+              <span aria-hidden="true">🔒</span>
+              <span>잠금</span>
+            </button>
+          )}
         </div>
       </div>
 
