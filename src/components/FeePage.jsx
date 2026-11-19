@@ -9,7 +9,8 @@ import {
   monthLabel,
   isSpecialStudent,
   todayStamp,
-  formatDate
+  formatDate,
+  DEFAULT_SESSION_GOAL
 } from '../feeDefaults';
 import '../fee.css';
 
@@ -27,8 +28,59 @@ const EMPTY_STUDENT = {
   freq: '정규 주 1회',
   rate: 160000,
   schedule: '',
-  memo: ''
+  memo: '',
+  sessions: { enabled: false, done: 0, goal: DEFAULT_SESSION_GOAL }
 };
+
+// 횟수 차감(4회권) 진행 회차 카운터 — 0/4회, +/−, 남은 N회 또는 4회 완료
+function SessionCounter({ student, onChange }) {
+  const sess = student.sessions || { enabled: false, done: 0, goal: DEFAULT_SESSION_GOAL };
+
+  if (!sess.enabled) {
+    return (
+      <button
+        type="button"
+        className="fee-sess-idle"
+        onClick={() => onChange({ enabled: true, done: 0, goal: DEFAULT_SESSION_GOAL })}
+        title="횟수 차감제(4회권) 켜기"
+        aria-label={`${student.name} 횟수 차감제 켜기`}
+      >
+        회차 관리
+      </button>
+    );
+  }
+
+  const done = Math.max(0, Number(sess.done) || 0);
+  const goal = Math.max(1, Number(sess.goal) || DEFAULT_SESSION_GOAL);
+  const complete = done >= goal;
+
+  return (
+    <div className={`fee-sess${complete ? ' complete' : ''}`}>
+      <button
+        type="button"
+        className="fee-sess-btn"
+        onClick={() => onChange({ ...sess, done: Math.max(0, done - 1), goal })}
+        disabled={done <= 0}
+        aria-label={`${student.name} 회차 차감`}
+        title="회차 차감"
+      >
+        −
+      </button>
+      <span className="fee-sess-count"><b>{done}</b>/{goal}회</span>
+      <button
+        type="button"
+        className="fee-sess-btn plus"
+        onClick={() => onChange({ ...sess, done: Math.min(goal, done + 1), goal })}
+        disabled={complete}
+        aria-label={`${student.name} 회차 추가`}
+        title="회차 추가"
+      >
+        +
+      </button>
+      <span className="fee-sess-state">{complete ? `${goal}회 완료` : `남은 ${goal - done}회`}</span>
+    </div>
+  );
+}
 
 function ScheduleText({ value }) {
   if (!value) return <span className="fee-muted">—</span>;
@@ -80,7 +132,12 @@ function StudentModal({ mode, initial, onClose, onSave, onDelete }) {
     onSave({
       ...form,
       name: form.name.trim(),
-      rate: Math.max(0, Number(String(form.rate).replace(/[^\d]/g, '')) || 0)
+      rate: Math.max(0, Number(String(form.rate).replace(/[^\d]/g, '')) || 0),
+      sessions: {
+        enabled: !!form.sessions?.enabled,
+        done: Math.max(0, Number(form.sessions?.done) || 0),
+        goal: Math.max(1, Number(form.sessions?.goal) || DEFAULT_SESSION_GOAL)
+      }
     });
   };
 
@@ -144,6 +201,64 @@ function StudentModal({ mode, initial, onClose, onSave, onDelete }) {
               onChange={(e) => set('rate', e.target.value.replace(/[^\d]/g, '').slice(0, 9))}
             />
           </label>
+
+          <div className="fee-field fee-field-wide fee-sess-field">
+            <label className="fee-sess-toggle">
+              <input
+                type="checkbox"
+                checked={!!form.sessions?.enabled}
+                onChange={(e) => setForm((prev) => ({
+                  ...prev,
+                  sessions: {
+                    enabled: e.target.checked,
+                    done: Number(prev.sessions?.done) || 0,
+                    goal: Number(prev.sessions?.goal) || DEFAULT_SESSION_GOAL
+                  }
+                }))}
+              />
+              <span>횟수 차감제 (4회권)</span>
+            </label>
+            {form.sessions?.enabled ? (
+              <div className="fee-sess-inputs">
+                <label className="fee-field">
+                  <span>목표 회차</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="52"
+                    value={form.sessions?.goal ?? DEFAULT_SESSION_GOAL}
+                    onChange={(e) => setForm((prev) => ({
+                      ...prev,
+                      sessions: {
+                        enabled: true,
+                        done: Number(prev.sessions?.done) || 0,
+                        goal: Math.max(1, Math.min(52, Number(e.target.value) || DEFAULT_SESSION_GOAL))
+                      }
+                    }))}
+                  />
+                </label>
+                <label className="fee-field">
+                  <span>진행 회차</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="52"
+                    value={form.sessions?.done ?? 0}
+                    onChange={(e) => setForm((prev) => ({
+                      ...prev,
+                      sessions: {
+                        enabled: true,
+                        done: Math.max(0, Math.min(52, Number(e.target.value) || 0)),
+                        goal: Number(prev.sessions?.goal) || DEFAULT_SESSION_GOAL
+                      }
+                    }))}
+                  />
+                </label>
+              </div>
+            ) : (
+              <p className="fee-sess-hint">월 4회가 다 안 채워져 다음 달로 넘어가는 학생은 켜 두면 진행 회차가 클라우드에 저장됩니다.</p>
+            )}
+          </div>
 
           <label className="fee-field fee-field-wide">
             <span>메모</span>
@@ -427,9 +542,34 @@ export default function FeePage({ year, month }) {
     } else {
       L.push('없음 (전원 확인 완료)');
     }
+
+    // 추가·차감 항목 (홈페이지 개발·관리비, 학생 관리비, 사용자 항목)
+    const extraLines = [];
+    if (calc.homeFee) extraLines.push({ label: '홈페이지 개발·관리비', amount: calc.homeFee, target: 'jiae' });
+    if (calc.manageFee) extraLines.push({ label: `학생 관리비 (${calc.students.length}명)`, amount: calc.manageFee, target: 'jiae' });
+    data.items.forEach((it) => {
+      if (Number(it.amount)) extraLines.push({ label: it.label, amount: Number(it.amount), target: it.target });
+    });
+
     L.push('');
-    L.push(`· 정산 합계 ${won(calc.grand)}`);
-    L.push(`· 지애 ${won(calc.jiae)} / 인웅쌤 ${won(calc.inung)} (${calc.ratio}:${100 - calc.ratio} 배분)`);
+    L.push('■ 최종 정산');
+    L.push(`· 레슨비 ${won(calc.total)} → 지애 ${won(calc.jiaeLesson)} / 인웅쌤 ${won(calc.inungLesson)} (${calc.ratio}:${100 - calc.ratio})`);
+    L.push(`· 추가·차감 합계 ${signed(calc.extraToJiae + calc.customInung)}`);
+    if (extraLines.length) {
+      extraLines.forEach((it) => {
+        L.push(`   - ${it.label} ${signed(it.amount)}${it.target === 'inung' ? ' (인웅쌤)' : ''}`);
+      });
+    }
+    L.push(`· 최종 정산 합계 ${won(calc.grand)}`);
+    L.push(`   - 지애 님 ${won(calc.jiae)}`);
+    L.push(`   - 인웅쌤 ${won(calc.inung)}`);
+
+    const tracked = calc.students.filter((s) => s.sessions?.enabled);
+    if (tracked.length) {
+      L.push('');
+      L.push(`■ 4회권 진행 (${tracked.length}명)`);
+      L.push(tracked.map((s) => `${s.name} ${Math.max(0, Number(s.sessions.done) || 0)}/${Math.max(1, Number(s.sessions.goal) || 4)}회`).join(' · '));
+    }
     return L.join('\n');
   };
 
@@ -518,7 +658,7 @@ export default function FeePage({ year, month }) {
         <div className="fee-notice-title">💰 실제 단가 반영 · {Number(month)}월 안내</div>
         <p>
           <b>1시간 주 1회 160,000원</b> · <b>40분 주 2회 210,000원</b> · <b>1시간 주 2회 260,000원</b> 기준입니다.
-          김유나 <b>160,000원</b>, 한수연 <b>150,000원</b>(1만 원 할인)처럼 학생별 단가는 표에서 바로 고칠 수 있어요.
+          한수연 <b>150,000원</b>(1만 원 할인)처럼 학생별 단가는 표에서 바로 고칠 수 있어요.
           배분은 <b>지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}%</b>이고, 홈페이지 개발·관리비와 학생 관리비는
           <b> 배분 제외</b>로 지애 님 몫에 더합니다.
           {data.note ? <> {data.note}</> : null}
@@ -529,7 +669,7 @@ export default function FeePage({ year, month }) {
       <div className="fee-card">
         <div className="fee-card-head">
           <h3>👥 학생별 정산 <span className="fee-hint">{visibleStudents.length === data.students.length ? `${data.students.length}명 전원` : `${visibleStudents.length}명 표시`}</span></h3>
-          <span className="fee-legend">배지를 누르면 미확인 → 입금완료 → 면제 순서로 바뀝니다 · 단가는 눌러서 바로 수정</span>
+          <span className="fee-legend">배지를 누르면 미확인 → 입금완료 → 면제 · 단가는 눌러서 바로 수정 · 회차는 +/−로 기록</span>
         </div>
 
         <div className="fee-rate-box">
@@ -537,7 +677,7 @@ export default function FeePage({ year, month }) {
           <span className="fee-rate-chip"><span>1시간 정규 · 주 1회</span><b>160,000원</b></span>
           <span className="fee-rate-chip"><span>40분 · 주 2회</span><b>210,000원</b></span>
           <span className="fee-rate-chip"><span>1시간 · 주 2회</span><b>260,000원</b></span>
-          <span className="fee-rb-note">김유나 160,000 · 한수연 150,000(1만 원 할인) · 앙상블·합주는 포함</span>
+          <span className="fee-rb-note">한수연 150,000(1만 원 할인) · 앙상블·합주는 포함</span>
         </div>
 
         <div className="fee-tool-row">
@@ -595,6 +735,7 @@ export default function FeePage({ year, month }) {
                 <th>학생</th>
                 <th>수업 요일 · 시간</th>
                 <th>수업 형태</th>
+                <th className="fee-col-sess">진행 회차</th>
                 <th className="fee-col-rate">레슨비</th>
                 <th>입금 상태</th>
                 <th>입금일</th>
@@ -605,7 +746,7 @@ export default function FeePage({ year, month }) {
             <tbody>
               {visibleStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="fee-empty">조건에 맞는 학생이 없어요. 필터를 바꾸거나 검색어를 지워 보세요.</td>
+                  <td colSpan={10} className="fee-empty">조건에 맞는 학생이 없어요. 필터를 바꾸거나 검색어를 지워 보세요.</td>
                 </tr>
               ) : (
                 visibleStudents.map((s) => (
@@ -616,6 +757,9 @@ export default function FeePage({ year, month }) {
                     <td>
                       <span className={`fee-badge form${s.form === '40분' ? ' m40' : ''}${s.form === '예약제' ? ' reserve' : ''}`}>{s.form}</span>
                       <span className="fee-form-sub">{s.freq}</span>
+                    </td>
+                    <td className="fee-col-sess">
+                      <SessionCounter student={s} onChange={(sessions) => updateStudent(s.id, { sessions })} />
                     </td>
                     <td className="fee-col-rate">
                       <label className="fee-rate">
@@ -664,7 +808,7 @@ export default function FeePage({ year, month }) {
               <tr>
                 <td colSpan={4} className="fee-foot-label">표시 {visibleStudents.length}명 · 합계</td>
                 <td className="fee-col-rate fee-foot-amount">{won(visibleSum)}</td>
-                <td colSpan={4} />
+                <td colSpan={5} />
               </tr>
             </tfoot>
           </table>
@@ -693,6 +837,10 @@ export default function FeePage({ year, month }) {
                   <span className="fee-form-sub">{s.freq}</span>
                 </div>
                 {s.schedule ? <div className="fee-student-times"><ScheduleText value={s.schedule} /></div> : null}
+                <div className="fee-student-sess">
+                  <span className="fee-student-sess-label">진행 회차</span>
+                  <SessionCounter student={s} onChange={(sessions) => updateStudent(s.id, { sessions })} />
+                </div>
                 <div className="fee-student-bottom">
                   <label className="fee-rate">
                     <input
