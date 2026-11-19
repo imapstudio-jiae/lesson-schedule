@@ -41,6 +41,24 @@ export default function TimetableGrid({
   };
 
 
+  // 모바일 좁은 칸에서도 읽히도록 여러 명이 들어간 이름을 축약
+  // 예) '학생합주2(이안, 정유나, …) · 1시간 20분' → '합주2 7명'
+  //     '성인 앙상블(최수연, 박은정, 김재용)' → '앙상블 3명'
+  //     (학생/성인 구분은 카드 아래 수업형태 뱃지에 그대로 남습니다)
+  const formatCompactStudentName = (name) => {
+    if (!name) return '';
+    const match = name.match(/^(.*?)\s*\(([^)]*)\)/);
+    if (match) {
+      let base = match[1].trim();
+      const people = match[2].split(',').map(s => s.trim()).filter(Boolean);
+      if (base && people.length >= 2) {
+        base = base.replace(/^(학생|성인)\s*/, '').trim() || base;
+        return `${base} ${people.length}명`;
+      }
+    }
+    return name;
+  };
+
   // 드래그 시작
   const handleDragStart = (e, slotKey) => {
     isDraggingRef.current = true;
@@ -199,14 +217,14 @@ export default function TimetableGrid({
       <div className="timetable-scroll-wrap">
         <table className="timetable-table">
           <colgroup>
-            <col style={{ width: '84px', minWidth: '84px' }} />
+            <col className="timetable-col-time" />
             {DAYS_OF_WEEK.map((day) => (
-              <col key={day.key} style={{ width: 'calc((100% - 84px) / 6)' }} />
+              <col key={day.key} className="timetable-col-day" />
             ))}
           </colgroup>
           <thead>
             <tr>
-              <th scope="col" style={{ width: '84px' }}>시간</th>
+              <th scope="col">시간</th>
               {DAYS_OF_WEEK.map((day) => (
                 <th 
                   key={day.key} 
@@ -269,7 +287,7 @@ export default function TimetableGrid({
 
                             return (
                               <div 
-                                className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''} ${isHighlighted ? 'lesson-card-highlighted' : ''}`}
+                                className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''} ${isHighlighted ? 'lesson-card-highlighted' : ''}${hasMemo ? ' has-memo' : ''}`}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, slotKey)}
                                 onDragEnd={handleDragEnd}
@@ -291,7 +309,8 @@ export default function TimetableGrid({
                                       <GripVertical size={12} />
                                     </span>
                                     <span className="student-name" style={{ color: style.color }}>
-                                      {lesson.studentName}
+                                      <span className="student-name-full">{lesson.studentName}</span>
+                                      <span className="student-name-compact">{formatCompactStudentName(lesson.studentName)}</span>
                                     </span>
                                     {hasMemo && (
                                       <span className="card-memo-indicator" title={`작성된 메모: ${lesson.memo}`}>

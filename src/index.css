@@ -680,6 +680,15 @@ input:focus, textarea:focus, select:focus {
   border-spacing: 0;
 }
 
+/* 열 너비 (데스크톱 기준: 시간 열 84px + 6개 요일 균등 분배) */
+.timetable-col-time {
+  width: 84px;
+}
+
+.timetable-col-day {
+  width: calc((100% - 84px) / 6);
+}
+
 /* 헤더 행 */
 .timetable-table thead th {
   position: sticky;
@@ -925,6 +934,11 @@ input:focus, textarea:focus, select:focus {
   min-width: 0;
   flex: 1 1 auto;
   line-height: 1.2;
+}
+
+/* 데스크톱에서는 원래 이름 전체, 모바일에서는 축약 이름만 노출 */
+.student-name-compact {
+  display: none;
 }
 
 .card-memo-indicator {
@@ -1826,3 +1840,178 @@ input:focus, textarea:focus, select:focus {
 }
 
 
+/* ════════════════════════════════════════════════════════════════
+   모바일(≤640px) 주간 레슨 시간표 전용 컴팩트 레이아웃
+   — 시간 열 + 6개 요일(월~토)이 가로 스크롤 없이 한 화면에 들어오도록 조정
+   — 데스크톱/넓은 화면, 다른 화면 요소는 이 블록의 영향을 받지 않습니다.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* 카드 바깥 여백을 조금만 활용해 표 폭을 더 확보 */
+  .timetable-section {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 14px;
+  }
+
+  .timetable-header-bar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .timetable-header-title {
+    font-size: 0.92rem;
+    gap: 6px;
+  }
+
+  .timetable-stats {
+    font-size: 10px;
+    gap: 8px;
+  }
+
+  .timetable-stats .stat-item span {
+    line-height: 1.25;
+  }
+
+  .drag-hint-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    gap: 3px;
+  }
+
+  .timetable-scroll-wrap {
+    max-height: none;
+  }
+
+  /* 960px 고정 최소 폭을 풀고 화면 폭에 딱 맞춤 */
+  .timetable-table {
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .timetable-col-time {
+    width: 34px;
+  }
+
+  .timetable-col-day {
+    width: auto;
+  }
+
+  .timetable-table thead th {
+    padding: 6px 0;
+    font-size: 10px;
+    letter-spacing: -0.04em;
+    white-space: normal;
+    word-break: keep-all;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .timetable-table thead th:first-child {
+    width: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    padding: 6px 0;
+    font-size: 9px;
+  }
+
+  .time-cell {
+    padding: 2px 0;
+    font-size: 9px;
+    letter-spacing: 0;
+    line-height: 1.2;
+  }
+
+  .time-half-mark {
+    font-size: 8.5px;
+  }
+
+  /* 셀·카드 높이를 고정하지 않고 내용에 맞춰 늘림 (합주 칸 여러 줄 대응) */
+  /* 표 셀은 min-height가 먹지 않으므로 height로 최소 행 높이를 고정 */
+  .slot-cell {
+    height: 30px;
+    min-height: 0;
+    max-height: none;
+    padding: 2px 1.5px;
+  }
+
+  .lesson-card {
+    height: auto;
+    min-height: 26px;
+    max-height: none;
+    padding: 2px;
+    border-left-width: 3px !important;
+    border-radius: 4px;
+    gap: 0;
+    position: relative;
+  }
+
+  /* 좁은 칸에서 이름 폭을 잃지 않도록 메모 표시는 카드 모서리 점으로 대체 */
+  .lesson-card.has-memo::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #7C3AED;
+    opacity: 0.55;
+  }
+
+  .lesson-card .card-memo-indicator {
+    display: none;
+  }
+
+  .lesson-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1px;
+  }
+
+  .lesson-card-student-wrap {
+    width: 100%;
+    gap: 2px;
+  }
+
+  .card-drag-handle {
+    display: none;
+  }
+
+  .student-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-overflow: clip;
+    line-height: 1.18;
+  }
+
+  .student-name-full {
+    display: none;
+  }
+
+  .student-name-compact {
+    display: inline;
+  }
+
+  .card-memo-indicator svg {
+    width: 9px;
+    height: 9px;
+  }
+  .lesson-type-badge {
+    font-size: 8px;
+    padding: 0 2px;
+    max-width: 100%;
+    border-radius: 3px;
+    line-height: 1.3;
+  }
+
+  .cell-empty-placeholder svg {
+    width: 12px;
+    height: 12px;
+  }
+}
