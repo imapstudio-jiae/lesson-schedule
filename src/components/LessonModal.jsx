@@ -13,7 +13,7 @@ import {
   Copy, 
   Calendar 
 } from 'lucide-react';
-import { LESSON_TYPES, COLOR_PALETTES, DAYS_OF_WEEK, TIME_SLOTS } from '../constants';
+import { LESSON_TYPES, COLOR_PALETTES, DAYS_OF_WEEK, TIME_SLOTS, isExternalScheduleCard } from '../constants';
 
 export default function LessonModal({
   isOpen,
@@ -258,6 +258,11 @@ export default function LessonModal({
                 />
               ))}
             </div>
+            {isExternalScheduleCard({ studentName, lessonType: lessonType === '직접 입력' ? customType : lessonType }) && (
+              <span style={{ fontSize: '0.72rem', color: '#1B5E20', marginTop: '6px', display: 'block', lineHeight: 1.4 }}>
+                외부·개인 일정 카드는 학생 레슨 카드와 헷갈리지 않도록 <b>세이지 그린</b>으로 표시됩니다.
+              </span>
+            )}
           </div>
 
           {/* 개별 메모 / 진도 사항 */}

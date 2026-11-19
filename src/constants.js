@@ -47,6 +47,25 @@ export const COLOR_PALETTES = [
   { id: 'stone', name: '웜 그레이', bg: '#F5F5F4', border: '#D6D3D1', text: '#44403C', badge: '#78716C' },
 ];
 
+// 외부·개인 일정 카드 전용 색상 (학생 레슨 카드와 한눈에 구분되는 세이지 그린)
+export const EXTERNAL_SCHEDULE_STYLE = {
+  id: 'external',
+  name: '외부 일정 (세이지 그린)',
+  bg: '#E6F4EA',
+  border: '#81C995',
+  text: '#1B5E20',
+  badge: '#2E7D32',
+  badgeBg: '#C8E6C9',
+};
+
+// 카드가 학생 레슨이 아니라 '외부 일정 / 개인 일정'인지 판별
+// (이름에 '외부 일정'이 들어가거나, 수업 형태가 '개인 일정'·'외부 일정'인 경우)
+export function isExternalScheduleCard(lesson) {
+  if (!lesson) return false;
+  const text = `${lesson.studentName || ''} ${lesson.lessonType || ''}`;
+  return /외부\s*일정|개인\s*일정/.test(text);
+}
+
 // 기본 초기 4개 메모 카드 템플릿
 export function getDefaultMemoCards() {
   return [

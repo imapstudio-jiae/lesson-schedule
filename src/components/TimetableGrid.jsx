@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Plus, Calendar, Clock, GripVertical, FileText } from 'lucide-react';
-import { DAYS_OF_WEEK, TIME_SLOTS, COLOR_PALETTES } from '../constants';
+import { DAYS_OF_WEEK, TIME_SLOTS, COLOR_PALETTES, EXTERNAL_SCHEDULE_STYLE, isExternalScheduleCard } from '../constants';
 
 export default function TimetableGrid({
   lessons = {},
@@ -25,6 +25,16 @@ export default function TimetableGrid({
       badgeBg: pal.border,
       badgeText: pal.text,
     };
+  };
+
+  // 외부·개인 일정 카드 전용 스타일 (저장된 색과 상관없이 항상 같은 색으로 구분)
+  const externalColorStyle = {
+    backgroundColor: EXTERNAL_SCHEDULE_STYLE.bg,
+    borderColor: EXTERNAL_SCHEDULE_STYLE.border,
+    borderLeftColor: EXTERNAL_SCHEDULE_STYLE.badge,
+    color: EXTERNAL_SCHEDULE_STYLE.text,
+    badgeBg: EXTERNAL_SCHEDULE_STYLE.badgeBg,
+    badgeText: EXTERNAL_SCHEDULE_STYLE.text,
   };
 
   // 시간표 카드에서 공간을 적게 차지하도록 수업 형태를 직관적으로 축약
@@ -282,12 +292,13 @@ export default function TimetableGrid({
                       >
                         {lesson ? (
                           (() => {
-                            const style = getColorStyle(lesson.color);
+                            const isExternal = isExternalScheduleCard(lesson);
+                            const style = isExternal ? externalColorStyle : getColorStyle(lesson.color);
                             const hasMemo = Boolean(lesson.memo && lesson.memo.trim());
 
                             return (
                               <div 
-                                className={`lesson-card ${isDraggingThis ? 'is-dragging' : ''} ${isHighlighted ? 'lesson-card-highlighted' : ''}${hasMemo ? ' has-memo' : ''}`}
+                                className={`lesson-card ${isExternal ? 'external-schedule' : ''} ${isDraggingThis ? 'is-dragging' : ''} ${isHighlighted ? 'lesson-card-highlighted' : ''}${hasMemo ? ' has-memo' : ''}`}
                                 draggable={true}
                                 onDragStart={(e) => handleDragStart(e, slotKey)}
                                 onDragEnd={handleDragEnd}

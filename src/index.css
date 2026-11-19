@@ -832,6 +832,19 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 외부·개인 일정 카드: 색뿐 아니라 은은한 사선 결로도 학생 레슨 카드와 구분 */
+.lesson-card.external-schedule {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(46, 125, 50, 0.08) 0 5px,
+    rgba(46, 125, 50, 0) 5px 10px
+  );
+}
+
+.lesson-card.external-schedule .lesson-type-badge {
+  font-weight: 800;
+}
+
 /* 드래그 중인 카드 상태 */
 .lesson-card.is-dragging {
   opacity: 0.35;
