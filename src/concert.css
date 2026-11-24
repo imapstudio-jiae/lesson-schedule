@@ -641,6 +641,10 @@
 }
 
 @media (max-width: 420px) {
-  .concert-summary { grid-template-columns: minmax(0, 1fr); }
-  .concert-stat { padding: 12px 14px; }
+  .concert-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .concert-stat { padding: 11px 12px; border-radius: 15px; }
+  .concert-stat-value { font-size: 22px; }
+  .concert-stat-label { font-size: 11.5px; }
+  .concert-stat-sub { font-size: 10.5px; }
+  .concert-time-input { font-size: 14px; padding: 4px 6px; }
 }
