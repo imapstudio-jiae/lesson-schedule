@@ -112,11 +112,75 @@ function StatusButton({ status, onClick }) {
       type="button"
       className={`fee-status ${status}`}
       onClick={onClick}
-      title="누를 때마다 미확인 → 입금완료 → 면제 순서로 바뀝니다"
+      title="누르면 확인 창이 뜹니다 · 미확인 → 입금완료 → 면제 순서"
     >
       <i className="fee-status-dot" />
       {STATUS_LABEL[status]}
     </button>
+  );
+}
+
+// 다음 입금 상태 (미확인 → 입금완료 → 면제 → 미확인)
+const nextStatusOf = (status) => {
+  if (status === 'unpaid') return 'paid';
+  if (status === 'paid') return 'exempt';
+  return 'unpaid';
+};
+
+// 입금 상태 변경 확인 창 — 스크롤·터치 중 실수로 바뀌지 않도록 한 번 더 묻는다
+function StatusConfirmModal({ student, ymLabel, onCancel, onConfirm }) {
+  const next = nextStatusOf(student.status);
+  const cancelRef = useRef(null);
+
+  useEffect(() => {
+    cancelRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
+  const nextTone = next === 'paid' ? 'paid' : next === 'exempt' ? 'exempt' : 'unpaid';
+
+  return (
+    <div
+      className="fee-modal-overlay fee-confirm-overlay"
+      onMouseDown={(e) => e.target === e.currentTarget && onCancel()}
+    >
+      <div
+        className="fee-confirm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="fee-confirm-title"
+      >
+        <p className="fee-confirm-kicker">입금 상태 변경</p>
+        <h3 id="fee-confirm-title" className="fee-confirm-title">
+          {student.name} 님 {ymLabel} 레슨비를
+          <br />
+          <span className={`fee-confirm-next ${nextTone}`}>‘{STATUS_LABEL[next]}’</span>(으)로 바꿀까요?
+        </h3>
+        <p className="fee-confirm-sub">
+          지금 상태 <b>{STATUS_LABEL[student.status]}</b>
+          {' → '}
+          <b>{STATUS_LABEL[next]}</b>
+          {next === 'paid' ? ' (입금일은 오늘로 저장돼요)' : ''}
+        </p>
+        <div className="fee-confirm-actions">
+          <button
+            type="button"
+            className="fee-confirm-btn cancel"
+            onClick={onCancel}
+            ref={cancelRef}
+          >
+            아니요, 그대로 둘게요
+          </button>
+          <button type="button" className="fee-confirm-btn ok" onClick={onConfirm}>
+            네, 바꿀게요
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -311,6 +375,7 @@ function FeePageActive({ year, month }) {
   const [kakaoTab, setKakaoTab] = useState('summary');
   const [toast, setToast] = useState('');
   const [newItem, setNewItem] = useState({ label: '', target: 'jiae', sign: '-', amount: '' });
+  const [statusConfirm, setStatusConfirm] = useState(null); // 확인 창을 띄운 학생
 
   const dirtyRef = useRef(false);      // 저장 대기 중인 변경이 있는지
   const editedRef = useRef(false);     // 이번 달 화면에서 사용자가 직접 고쳤는지 (클라우드 덮어쓰기 방지)
@@ -479,6 +544,20 @@ function FeePageActive({ year, month }) {
         return { ...s, status: 'unpaid', paidDate: '' };
       })
     }));
+
+  // 배지 클릭 → 바로 바꾸지 않고 확인 창만 띄운다 (확인을 눌러야 변경)
+  const requestStatusChange = (student) => setStatusConfirm(student);
+  const closeStatusConfirm = useCallback(() => setStatusConfirm(null), []);
+
+  const confirmStatusChange = () => {
+    if (!statusConfirm) return;
+    // 실시간 동기화로 상태가 바뀌었을 수 있으니 지금 데이터 기준으로 계산
+    const current = dataRef.current?.students?.find((s) => s.id === statusConfirm.id) || statusConfirm;
+    const next = nextStatusOf(current.status);
+    setStatusConfirm(null);
+    cycleStatus(current.id);
+    showToast(`${current.name} 님을 ‘${STATUS_LABEL[next]}’(으)로 바꿨어요`);
+  };
 
   const handleSaveStudent = (payload) => {
     if (editing?.mode === 'add') {
@@ -669,7 +748,7 @@ function FeePageActive({ year, month }) {
       <div className="fee-card">
         <div className="fee-card-head">
           <h3>👥 학생별 정산 <span className="fee-hint">{visibleStudents.length === data.students.length ? `${data.students.length}명 전원` : `${visibleStudents.length}명 표시`}</span></h3>
-          <span className="fee-legend">배지를 누르면 미확인 → 입금완료 → 면제 · 단가는 눌러서 바로 수정 · 회차는 +/−로 기록</span>
+          <span className="fee-legend">배지를 누르면 확인 창에서 미확인 → 입금완료 → 면제 · 단가는 눌러서 바로 수정 · 회차는 +/−로 기록</span>
         </div>
 
         <div className="fee-rate-box">
@@ -774,7 +853,7 @@ function FeePageActive({ year, month }) {
                         <span>원</span>
                       </label>
                     </td>
-                    <td><StatusButton status={s.status} onClick={() => cycleStatus(s.id)} /></td>
+                    <td><StatusButton status={s.status} onClick={() => requestStatusChange(s)} /></td>
                     <td className={`fee-cell-date${s.status === 'paid' ? '' : ' none'}`}>
                       {s.status === 'paid' ? (
                         <input
@@ -853,7 +932,7 @@ function FeePageActive({ year, month }) {
                     />
                     <span>원</span>
                   </label>
-                  <StatusButton status={s.status} onClick={() => cycleStatus(s.id)} />
+                  <StatusButton status={s.status} onClick={() => requestStatusChange(s)} />
                 </div>
                 {s.status === 'paid' ? (
                   <div className="fee-student-date">
@@ -1156,6 +1235,15 @@ function FeePageActive({ year, month }) {
           onClose={() => setEditing(null)}
           onSave={handleSaveStudent}
           onDelete={handleDeleteStudent}
+        />
+      ) : null}
+
+      {statusConfirm ? (
+        <StatusConfirmModal
+          student={data.students.find((s) => s.id === statusConfirm.id) || statusConfirm}
+          ymLabel={ymLabel}
+          onCancel={closeStatusConfirm}
+          onConfirm={confirmStatusChange}
         />
       ) : null}
 

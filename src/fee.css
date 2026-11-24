@@ -439,6 +439,41 @@
 .fee-modal-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
 .fee-modal-actions { display: flex; gap: 7px; }
 
+/* ── 입금 상태 변경 확인 창 ── */
+.fee-confirm-overlay { z-index: 1300; }
+.fee-confirm {
+  width: 100%; max-width: 360px; background: #fff; border-radius: 22px;
+  box-shadow: 0 30px 60px -20px rgba(35, 28, 66, 0.55);
+  padding: 22px 20px 18px; text-align: center;
+}
+.fee-confirm-kicker {
+  margin: 0 0 8px; font-size: 11px; font-weight: 900; letter-spacing: 0.04em;
+  color: var(--fee-lav-ink); background: var(--fee-lav-soft); display: inline-block;
+  padding: 4px 10px; border-radius: 999px;
+}
+.fee-confirm-title {
+  margin: 10px 0 0; font-size: 17px; line-height: 1.5; font-weight: 800;
+  color: var(--fee-ink); letter-spacing: -0.01em; word-break: keep-all;
+}
+.fee-confirm-next { font-weight: 900; }
+.fee-confirm-next.paid { color: var(--fee-mint-ink); }
+.fee-confirm-next.unpaid { color: var(--fee-coral-ink); }
+.fee-confirm-next.exempt { color: #6f6a86; }
+.fee-confirm-sub { margin: 10px 0 0; font-size: 13px; font-weight: 700; color: var(--fee-ink2); }
+.fee-confirm-sub b { font-weight: 900; color: var(--fee-ink); }
+.fee-confirm-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.fee-confirm-btn {
+  width: 100%; min-height: 50px; border-radius: 14px; border: 1.5px solid transparent;
+  font-family: inherit; font-size: 15px; font-weight: 900; cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+.fee-confirm-btn:active { transform: scale(0.985); }
+.fee-confirm-btn.cancel { background: #f4f2fa; color: var(--fee-ink2); border-color: #e6e2f1; }
+.fee-confirm-btn.cancel:hover { filter: brightness(0.985); }
+.fee-confirm-btn.ok { background: var(--fee-lav); color: #fff; box-shadow: 0 10px 22px -12px rgba(114, 87, 236, 0.9); }
+.fee-confirm-btn.ok:hover { filter: brightness(1.04); }
+.fee-confirm-btn:focus-visible { outline: 3px solid rgba(114, 87, 236, 0.35); outline-offset: 2px; }
+
 /* ── 토스트 ── */
 .fee-toast {
   position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 1400;
@@ -548,6 +583,9 @@
   .fee-final-amounts b { font-size: 15px; }
   .fee-item-row .fee-item-label, .fee-item-add .fee-item-label { flex: 1 1 100%; }
   .fee-modal { max-width: 100%; padding: 16px 14px 14px; }
+  .fee-confirm { max-width: 100%; padding: 20px 16px 16px; border-radius: 18px; }
+  .fee-confirm-title { font-size: 16px; }
+  .fee-confirm-btn { min-height: 52px; font-size: 15.5px; }
   .fee-field-grid { grid-template-columns: 1fr; }
   .fee-kakao-text { max-height: 300px; }
   .fee-cutoff { padding: 24px 18px 22px; border-radius: 18px; margin-top: 4px; }
