@@ -1,0 +1,646 @@
+/* ===== 🎤 공연 기획 페이지 (concert-) ===== */
+.concert-page {
+  --con-ink: #1b1729;
+  --con-ink2: #423c58;
+  --con-muted: #565070;
+  --con-line: #e2dfee;
+  --con-line-soft: #eeecf6;
+  --con-lav: #5b41d6;
+  --con-lav-soft: #f1ecff;
+  --con-lav-line: #cfc2ff;
+  --con-green: #0b6b53;
+  --con-green-soft: #e2f7ee;
+  --con-green-line: #a9e3cd;
+  --con-amber: #8a4d00;
+  --con-amber-soft: #fff2d9;
+  --con-amber-line: #f0cd93;
+  --con-gray: #474155;
+  --con-gray-soft: #efedf6;
+  --con-red: #a72118;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--con-ink);
+  min-width: 0;
+}
+
+.concert-page *,
+.concert-page *::before,
+.concert-page *::after { box-sizing: border-box; }
+
+.concert-page button { font-family: inherit; cursor: pointer; }
+
+/* ── 공연 선택 바 ── */
+.concert-showbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.concert-show-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.concert-show-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid #ffffff;
+  background: #ffffff;
+  box-shadow: 0 6px 18px -12px rgba(50, 36, 100, 0.4);
+  color: var(--con-ink);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.concert-show-tab b {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.concert-show-tab span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--con-muted);
+}
+
+.concert-show-tab:hover { border-color: var(--con-lav-line); }
+
+.concert-show-tab.active {
+  border-color: var(--con-lav);
+  background: var(--con-lav-soft);
+  box-shadow: 0 8px 20px -12px rgba(91, 65, 214, 0.7);
+}
+
+.concert-show-tab.active b { color: var(--con-lav); }
+
+.concert-showbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── 버튼 ── */
+.concert-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--con-line);
+  background: #ffffff;
+  color: var(--con-ink);
+  white-space: nowrap;
+}
+
+.concert-btn:hover { border-color: var(--con-lav-line); color: var(--con-lav); }
+
+.concert-btn.primary {
+  background: linear-gradient(135deg, #6a4ef0, #5b41d6);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 8px 18px -10px rgba(91, 65, 214, 0.9);
+}
+
+.concert-btn.primary:hover { color: #ffffff; filter: brightness(1.07); }
+
+.concert-btn.outline {
+  background: #ffffff;
+  border-color: var(--con-lav-line);
+  color: var(--con-lav);
+}
+
+.concert-btn.green {
+  background: var(--con-green-soft);
+  border-color: var(--con-green-line);
+  color: var(--con-green);
+}
+
+.concert-btn.ghost { background: #f6f4fc; border-color: transparent; color: var(--con-ink2); }
+
+.concert-btn.danger {
+  background: #fdecea;
+  border-color: #f6c3bd;
+  color: var(--con-red);
+}
+
+.concert-btn.danger.confirming { background: var(--con-red); color: #ffffff; border-color: var(--con-red); }
+
+.concert-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--con-line-soft);
+  background: #faf9fe;
+  color: var(--con-ink2);
+}
+
+.concert-icon-btn:hover { border-color: var(--con-lav-line); color: var(--con-lav); }
+.concert-icon-btn.danger { color: #b3382c; }
+.concert-icon-btn.danger:hover { background: #fdecea; border-color: #f3bcb5; color: var(--con-red); }
+
+/* ── 공연 추가/수정 폼 ── */
+.concert-show-form {
+  background: #ffffff;
+  border: 2px solid var(--con-lav-line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 28px -20px rgba(60, 44, 110, 0.6);
+}
+
+.concert-show-form-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14.5px;
+}
+
+.concert-show-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+
+.concert-show-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.concert-show-form-actions { display: flex; gap: 8px; }
+
+.concert-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.concert-field > span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--con-ink2);
+}
+
+.concert-field input,
+.concert-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1.5px solid var(--con-line);
+  background: #ffffff;
+  color: var(--con-ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.concert-field input:focus,
+.concert-field select:focus {
+  outline: none;
+  border-color: var(--con-lav);
+  box-shadow: 0 0 0 3px rgba(91, 65, 214, 0.14);
+}
+
+/* ── 요약 ── */
+.concert-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.concert-stat {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  min-width: 0;
+  box-shadow: 0 10px 26px -20px rgba(50, 36, 100, 0.5);
+}
+
+.concert-stat-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--con-muted);
+  letter-spacing: -0.01em;
+}
+
+.concert-stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-top: 4px;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--con-ink);
+}
+
+.concert-stat-value.ok { color: var(--con-green); }
+.concert-stat-value.hold { color: var(--con-amber); }
+
+.concert-stat-value .unit {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--con-muted);
+  letter-spacing: 0;
+}
+
+.concert-stat-sub {
+  margin-top: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--con-muted);
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.concert-time-input {
+  width: 100%;
+  min-width: 0;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  border: 1.5px solid var(--con-line);
+  background: #fbfaff;
+  color: var(--con-ink);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.concert-time-input::placeholder { color: #8d87a3; font-weight: 700; }
+.concert-time-input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: var(--con-lav);
+  box-shadow: 0 0 0 3px rgba(91, 65, 214, 0.14);
+}
+
+/* ── 셋리스트 카드 ── */
+.concert-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 14px 34px -24px rgba(50, 36, 100, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.concert-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.concert-card-head h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--con-ink);
+}
+
+.concert-card-hint {
+  margin: 5px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--con-muted);
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.concert-card-hint b { color: var(--con-lav); }
+
+/* ── 표 ── */
+.concert-table-wrap { width: 100%; min-width: 0; }
+
+.concert-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.concert-table thead th {
+  padding: 8px 6px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--con-muted);
+  border-bottom: 2px solid var(--con-line);
+  white-space: nowrap;
+}
+
+.concert-table tbody td {
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--con-line-soft);
+  vertical-align: middle;
+}
+
+.concert-table tbody tr.is-confirmed { background: #f7fdfa; }
+.concert-table tbody tr.is-confirmed td:first-child { box-shadow: inset 3px 0 0 #17a179; }
+
+.concert-table .c-no { width: 74px; }
+.concert-table .c-performer { width: 21%; }
+.concert-table .c-song { width: 27%; }
+.concert-table .c-form { width: 104px; }
+.concert-table .c-status { width: 92px; }
+.concert-table .c-manage { width: 46px; text-align: center; }
+
+.concert-order {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.concert-order > b {
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--con-ink);
+  min-width: 16px;
+}
+
+.concert-order-btns { display: flex; gap: 3px; }
+
+.concert-order-btns button {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 1px solid var(--con-line);
+  background: #fbfaff;
+  color: var(--con-ink2);
+}
+
+.concert-order-btns button:hover:not(:disabled) { border-color: var(--con-lav); color: var(--con-lav); }
+.concert-order-btns button:disabled { opacity: 0.35; cursor: default; }
+.concert-order-btns button.danger { color: #b3382c; border-color: #f3c4be; background: #fdf2f0; }
+
+.concert-input {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--con-ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.concert-input::placeholder { color: #8d87a3; font-weight: 600; }
+.concert-input:hover { border-color: var(--con-line-soft); background: #fbfaff; }
+.concert-input:focus {
+  outline: none;
+  border-color: var(--con-lav);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(91, 65, 214, 0.14);
+}
+
+.concert-input.song { font-weight: 700; }
+.concert-input.memo { font-size: 12.5px; font-weight: 600; color: var(--con-ink2); }
+
+.concert-select {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 6px;
+  border-radius: 9px;
+  border: 1.5px solid var(--con-line);
+  background: #fbfaff;
+  color: var(--con-ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.concert-select:focus {
+  outline: none;
+  border-color: var(--con-lav);
+  box-shadow: 0 0 0 3px rgba(91, 65, 214, 0.14);
+}
+
+/* ── 상태 배지 ── */
+.concert-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 99px;
+  border: 1.5px solid;
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.concert-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.concert-status.confirmed { background: var(--con-green-soft); border-color: var(--con-green-line); color: var(--con-green); }
+.concert-status.candidate { background: var(--con-amber-soft); border-color: var(--con-amber-line); color: var(--con-amber); }
+.concert-status.pending { background: var(--con-gray-soft); border-color: #d9d5e6; color: var(--con-gray); }
+
+.concert-status:hover { filter: brightness(0.97); }
+
+.concert-empty {
+  padding: 18px 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--con-muted);
+}
+
+/* ── 모바일 카드 ── */
+.concert-mobile { display: none; }
+
+.concert-item-card {
+  border: 1.5px solid var(--con-line);
+  border-radius: 14px;
+  padding: 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: #ffffff;
+}
+
+.concert-item-card.is-confirmed {
+  border-color: var(--con-green-line);
+  background: #f7fdfa;
+}
+
+.concert-item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.concert-item-no {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--con-lav-soft);
+  color: var(--con-lav);
+  font-size: 12.5px;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.concert-item-card .concert-input.performer {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 5px 6px;
+  border-color: var(--con-line-soft);
+}
+
+.concert-item-card .concert-input.song {
+  font-size: 14px;
+  padding: 6px;
+  border-color: var(--con-line-soft);
+}
+
+.concert-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.concert-item-meta .concert-select { width: auto; flex: 0 0 auto; }
+.concert-item-meta .concert-status { width: auto; flex: 1 1 auto; }
+
+.concert-item-card .concert-input.memo {
+  font-size: 12.5px;
+  padding: 6px;
+  border-color: var(--con-line-soft);
+}
+
+/* ── 새 항목 추가 ── */
+.concert-add-form {
+  border-top: 2px dashed var(--con-line);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.concert-add-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--con-lav);
+}
+
+.concert-add-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.5fr) 108px 96px minmax(0, 1.1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.concert-btn.add { height: 38px; }
+
+.concert-foot {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--con-muted);
+  word-break: keep-all;
+}
+
+/* ── 토스트 ── */
+.concert-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: #241e3c;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px 18px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 1080px) {
+  .concert-add-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 104px; }
+  .concert-add-fields .concert-field.memo { grid-column: span 2; }
+  .concert-btn.add { grid-column: span 1; }
+}
+
+@media (max-width: 860px) {
+  .concert-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .concert-show-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .concert-show-fields .concert-field.wide:first-child { grid-column: span 2; }
+  .concert-show-fields .concert-field.wide:last-child { grid-column: span 1; }
+}
+
+@media (max-width: 760px) {
+  .concert-table-wrap { display: none; }
+  .concert-mobile { display: flex; flex-direction: column; gap: 9px; }
+
+  .concert-show-tabs { width: 100%; }
+  .concert-show-tab { flex: 1 1 100%; }
+  .concert-showbar { flex-direction: column; align-items: stretch; }
+  .concert-showbar-actions { width: 100%; }
+  .concert-showbar-actions .concert-btn { flex: 1 1 0; }
+
+  .concert-card { padding: 14px 12px 12px; }
+  .concert-card-head { flex-direction: column; align-items: stretch; }
+  .concert-card-head .concert-btn.green { width: 100%; }
+
+  .concert-add-fields { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .concert-add-fields .concert-field.song { grid-column: span 2; }
+  .concert-add-fields .concert-field.memo { grid-column: span 2; }
+  .concert-btn.add { grid-column: span 2; width: 100%; }
+
+  .concert-stat-value { font-size: 24px; }
+}
+
+@media (max-width: 420px) {
+  .concert-summary { grid-template-columns: minmax(0, 1fr); }
+  .concert-stat { padding: 12px 14px; }
+}

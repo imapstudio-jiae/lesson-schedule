@@ -205,7 +205,7 @@ export default function Header({
         </div>
       </div>
 
-      {/* 상단 탭 전환: 📅 시간표 ↔ 💰 레슨비 정산 */}
+      {/* 상단 탭 전환: 📅 시간표 ↔ 💰 레슨비 정산 ↔ 🎤 공연 기획 */}
       <div className="app-tab-bar">
         <div className="app-tab-track" role="tablist" aria-label="페이지 전환">
           <button
@@ -226,13 +226,27 @@ export default function Header({
           >
             <span className="app-tab-emoji">💰</span> 레슨비 정산
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'concert'}
+            className={`app-tab${activeTab === 'concert' ? ' active' : ''}`}
+            onClick={() => onChangeTab && onChangeTab('concert')}
+          >
+            <span className="app-tab-emoji">🎤</span> 공연 기획
+          </button>
         </div>
         <span className="app-tab-note">
-          {activeTab === 'fees' ? '월별로 따로 저장 · 입금 상태·배분을 바로 고칠 수 있어요' : '레슨 일정과 메모는 그대로, 정산은 오른쪽 탭에서'}
+          {activeTab === 'fees'
+            ? '월별로 따로 저장 · 입금 상태·배분을 바로 고칠 수 있어요'
+            : activeTab === 'concert'
+              ? '공연별 셋리스트를 지애 님·인웅쌤이 함께 고쳐요'
+              : '레슨 일정과 메모는 그대로, 정산·공연은 오른쪽 탭에서'}
         </span>
       </div>
 
-      {/* 연월 네비게이터 & 빠른 이동 */}
+      {/* 연월 네비게이터 & 빠른 이동 (공연 기획 탭에서는 공연별로 보므로 숨김) */}
+      {activeTab !== 'concert' && (
       <div className="month-nav-bar">
         <div className="month-display-group">
           <button 
@@ -291,6 +305,7 @@ export default function Header({
           </button>
         </div>
       </div>
+      )}
     </header>
   );
 }

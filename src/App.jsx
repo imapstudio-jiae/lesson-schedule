@@ -6,6 +6,7 @@ import LessonModal from './components/LessonModal';
 import MemoCardsSection from './components/MemoCardsSection';
 import MemoDetailModal from './components/MemoDetailModal';
 import FeePage from './components/FeePage';
+import ConcertPage from './components/ConcertPage';
 
 import { 
   getStoredStudioId, 
@@ -29,7 +30,7 @@ export default function App({ onLock }) {
   const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth() + 1);
 
-  // 상단 페이지 탭: 'schedule' (📅 시간표) | 'fees' (💰 레슨비 정산)
+  // 상단 페이지 탭: 'schedule' (📅 시간표) | 'fees' (💰 레슨비 정산) | 'concert' (🎤 공연 기획)
   const [activeTab, setActiveTab] = useState('schedule');
 
   // 스튜디오 기본 정보
@@ -810,6 +811,8 @@ export default function App({ onLock }) {
           month={currentMonth}
           onGoToMonth={handleSelectYearMonth}
         />
+      ) : activeTab === 'concert' ? (
+        <ConcertPage />
       ) : (
         <>
           {/* 2. 상단 운영 안내문 (수정 가능, 실시간 자동 공유) */}
