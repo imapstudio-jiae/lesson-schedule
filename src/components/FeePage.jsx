@@ -484,7 +484,7 @@ function FeePageActive({ year, month }) {
     const paidAmt = sumOf(paid);
     const unpaidAmt = sumOf(unpaid);
     const exemptAmt = sumOf(exempt);
-    const total = paidAmt + unpaidAmt;
+    const total = paidAmt + unpaidAmt; // 청구 합계 — 참고 표시용
     const pct = total ? Math.round((paidAmt / total) * 100) : 0;
 
     const ratio = clampRatio(data.ratio);
@@ -497,16 +497,19 @@ function FeePageActive({ year, month }) {
     const customJiae = data.items.filter((i) => i.target === 'jiae').reduce((a, i) => a + (Number(i.amount) || 0), 0);
     const customInung = data.items.filter((i) => i.target === 'inung').reduce((a, i) => a + (Number(i.amount) || 0), 0);
 
-    const jiaeLesson = Math.round((total * ratio) / 100);
-    const inungLesson = total - jiaeLesson;
+    // 레슨비 배분은 ‘입금완료(실입금)’ 금액만 기준 — 미확인·면제는 배분에서 빠지고,
+    // 입금 확인으로 상태가 바뀌면 그 금액이 바로 배분에 들어온다.
+    const lessonBase = paidAmt;
+    const jiaeLesson = Math.round((lessonBase * ratio) / 100);
+    const inungLesson = lessonBase - jiaeLesson;
 
     const jiae = jiaeLesson + baseExtra + customJiae;
     const inung = inungLesson + customInung;
     const extraToJiae = baseExtra + customJiae;
-    const grand = total + baseExtra + customJiae + customInung;
+    const grand = lessonBase + baseExtra + customJiae + customInung;
 
     return {
-      students, paid, unpaid, exempt, paidAmt, unpaidAmt, exemptAmt, total, pct,
+      students, paid, unpaid, exempt, paidAmt, unpaidAmt, exemptAmt, total, lessonBase, pct,
       ratio, homeFee, manageFee, baseExtra, customJiae, customInung,
       jiaeLesson, inungLesson, jiae, inung, extraToJiae, grand
     };
@@ -609,9 +612,9 @@ function FeePageActive({ year, month }) {
     L.push(`[IMAP Studio] ${ymLabel} 레슨비 정산`);
     L.push(`${ymLabel} 기준`);
     L.push('');
-    L.push(`· 수강생 ${calc.students.length}명 · 청구 ${won(calc.total)}`);
-    L.push(`· 입금 확인 ${calc.paid.length}명 (${won(calc.paidAmt)})`);
-    L.push(`· 미확인 ${calc.unpaid.length}명 (${won(calc.unpaidAmt)})`);
+    L.push(`· 수강생 ${calc.students.length}명 · 청구 ${won(calc.total)} (참고)`);
+    L.push(`· 입금 확인 ${calc.paid.length}명 (${won(calc.paidAmt)}) · 배분 기준`);
+    L.push(`· 미확인 ${calc.unpaid.length}명 (${won(calc.unpaidAmt)}) · 배분 제외`);
     if (calc.exempt.length) L.push(`· 면제 ${calc.exempt.length}명 (${won(calc.exemptAmt)})`);
     L.push('');
     L.push(`■ 미확인 명단 (${calc.unpaid.length}명)`);
@@ -632,7 +635,8 @@ function FeePageActive({ year, month }) {
 
     L.push('');
     L.push('■ 최종 정산');
-    L.push(`· 레슨비 ${won(calc.total)} → 지애 ${won(calc.jiaeLesson)} / 인웅쌤 ${won(calc.inungLesson)} (${calc.ratio}:${100 - calc.ratio})`);
+    L.push(`· 레슨비(입금 확인 기준) ${won(calc.lessonBase)} → 지애 ${won(calc.jiaeLesson)} / 인웅쌤 ${won(calc.inungLesson)} (${calc.ratio}:${100 - calc.ratio})`);
+    if (calc.unpaidAmt) L.push(`   미확인 ${won(calc.unpaidAmt)}은 입금 확인되면 바로 반영`);
     L.push(`· 추가·차감 합계 ${signed(calc.extraToJiae + calc.customInung)}`);
     if (extraLines.length) {
       extraLines.forEach((it) => {
@@ -728,7 +732,7 @@ function FeePageActive({ year, month }) {
           <div className="fee-stat-icon">💰</div>
           <div className="fee-stat-label">이번 달 정산 합계</div>
           <div className="fee-stat-value">{num(calc.grand)}<span className="unit">원</span></div>
-          <div className="fee-stat-sub">레슨비 {num(calc.total)} · 추가 {num(calc.extraToJiae + calc.customInung)}</div>
+          <div className="fee-stat-sub">실입금 {num(calc.lessonBase)} · 추가 {num(calc.extraToJiae + calc.customInung)}</div>
         </div>
       </div>
 
@@ -740,6 +744,8 @@ function FeePageActive({ year, month }) {
           한수연 <b>150,000원</b>(1만 원 할인)처럼 학생별 단가는 표에서 바로 고칠 수 있어요.
           배분은 <b>지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}%</b>이고, 홈페이지 개발·관리비와 학생 관리비는
           <b> 배분 제외</b>로 지애 님 몫에 더합니다.
+          레슨비 배분은 <b>입금 확인된 금액만</b> 기준으로 나누며, 미확인·면제는 배분에서 빠집니다(입금 확인되면 바로 반영).
+          학생 관리비는 입금 여부와 상관없이 <b>등록된 전체 학생 수</b> 기준입니다.
           {data.note ? <> {data.note}</> : null}
         </p>
       </div>
@@ -963,9 +969,9 @@ function FeePageActive({ year, month }) {
           </div>
 
           <div className="fee-pay-lines">
-            <div className="fee-pay-line"><span>청구 합계 (면제 제외)</span><b>{won(calc.total)}</b></div>
-            <div className="fee-pay-line paid"><span>입금 확인</span><b>{won(calc.paidAmt)}</b></div>
-            <div className="fee-pay-line unpaid"><span>아직 미확인</span><b>{won(calc.unpaidAmt)}</b></div>
+            <div className="fee-pay-line"><span>청구 합계 (면제 제외) <small>참고</small></span><b>{won(calc.total)}</b></div>
+            <div className="fee-pay-line paid"><span>입금 확인 <small>배분 기준</small></span><b>{won(calc.paidAmt)}</b></div>
+            <div className="fee-pay-line unpaid"><span>아직 미확인 <small>배분 제외</small></span><b>{won(calc.unpaidAmt)}</b></div>
             <div className="fee-pay-line"><span>면제</span><b>{won(calc.exemptAmt)}{calc.exempt.length ? ` (${calc.exempt.length}명)` : ''}</b></div>
             <div className="fee-pay-line extra"><span>추가 정산 <small>배분 제외 · 지애 님</small></span><b>{signed(calc.extraToJiae)}</b></div>
             <div className="fee-pay-line grand"><span>최종 정산 합계</span><b>{won(calc.grand)}</b></div>
@@ -976,7 +982,7 @@ function FeePageActive({ year, month }) {
           <div className="fee-split">
             <div className="fee-split-head">
               <span>배분</span>
-              <span className="fee-tip">지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}%</span>
+              <span className="fee-tip">지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}% · 입금 확인 금액 기준</span>
             </div>
 
             <div className="fee-split-row">
@@ -1198,7 +1204,7 @@ function FeePageActive({ year, month }) {
             </div>
 
             <div className="fee-split-foot">
-              레슨비 {won(calc.total)} 기준 {calc.ratio}:{100 - calc.ratio} 배분 + 추가 정산 {signed(calc.extraToJiae + calc.customInung)}
+              레슨비 {won(calc.lessonBase)} (입금 확인 기준) {calc.ratio}:{100 - calc.ratio} 배분 + 추가 정산 {signed(calc.extraToJiae + calc.customInung)}{calc.unpaidAmt ? ` · 미확인 ${won(calc.unpaidAmt)}은 배분 제외` : ''}
               {' '}· 비율·단가·인원을 바꾸면 바로 다시 계산됩니다
             </div>
           </div>
