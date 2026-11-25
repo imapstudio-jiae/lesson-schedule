@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Plus, Search, Copy, Edit2, Trash2, X, Wallet } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, X, Wallet } from 'lucide-react';
 import { getSupabaseData, saveSupabaseData } from '../supabase';
 import { realtimeSync } from '../realtimeSync';
 import {
@@ -372,7 +372,6 @@ function FeePageActive({ year, month }) {
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(null); // { mode, student }
-  const [kakaoTab, setKakaoTab] = useState('summary');
   const [toast, setToast] = useState('');
   const [newItem, setNewItem] = useState({ label: '', target: 'jiae', sign: '-', amount: '' });
   const [statusConfirm, setStatusConfirm] = useState(null); // 확인 창을 띄운 학생
@@ -606,95 +605,7 @@ function FeePageActive({ year, month }) {
   const deleteItem = (id) =>
     apply((d) => ({ ...d, items: d.items.filter((i) => i.id !== id) }));
 
-  // ── 문구 ──
-  const kakaoSummaryText = () => {
-    const L = [];
-    L.push(`[IMAP Studio] ${ymLabel} 레슨비 정산`);
-    L.push(`${ymLabel} 기준`);
-    L.push('');
-    L.push(`· 수강생 ${calc.students.length}명 · 청구 ${won(calc.total)} (참고)`);
-    L.push(`· 입금 확인 ${calc.paid.length}명 (${won(calc.paidAmt)}) · 배분 기준`);
-    L.push(`· 미확인 ${calc.unpaid.length}명 (${won(calc.unpaidAmt)}) · 배분 제외`);
-    if (calc.exempt.length) L.push(`· 면제 ${calc.exempt.length}명 (${won(calc.exemptAmt)})`);
-    L.push('');
-    L.push(`■ 미확인 명단 (${calc.unpaid.length}명)`);
-    if (calc.unpaid.length) {
-      const items = calc.unpaid.map((s) => `${s.name} ${won(s.rate)}`);
-      for (let i = 0; i < items.length; i += 3) L.push(items.slice(i, i + 3).join(' · '));
-    } else {
-      L.push('없음 (전원 확인 완료)');
-    }
-
-    // 추가·차감 항목 (홈페이지 개발·관리비, 학생 관리비, 사용자 항목)
-    const extraLines = [];
-    if (calc.homeFee) extraLines.push({ label: '홈페이지 개발·관리비', amount: calc.homeFee, target: 'jiae' });
-    if (calc.manageFee) extraLines.push({ label: `학생 관리비 (${calc.students.length}명)`, amount: calc.manageFee, target: 'jiae' });
-    data.items.forEach((it) => {
-      if (Number(it.amount)) extraLines.push({ label: it.label, amount: Number(it.amount), target: it.target });
-    });
-
-    L.push('');
-    L.push('■ 최종 정산');
-    L.push(`· 레슨비(입금 확인 기준) ${won(calc.lessonBase)} → 지애 ${won(calc.jiaeLesson)} / 인웅쌤 ${won(calc.inungLesson)} (${calc.ratio}:${100 - calc.ratio})`);
-    if (calc.unpaidAmt) L.push(`   미확인 ${won(calc.unpaidAmt)}은 입금 확인되면 바로 반영`);
-    L.push(`· 추가·차감 합계 ${signed(calc.extraToJiae + calc.customInung)}`);
-    if (extraLines.length) {
-      extraLines.forEach((it) => {
-        L.push(`   - ${it.label} ${signed(it.amount)}${it.target === 'inung' ? ' (인웅쌤)' : ''}`);
-      });
-    }
-    L.push(`· 최종 정산 합계 ${won(calc.grand)}`);
-    L.push(`   - 지애 님 ${won(calc.jiae)}`);
-    L.push(`   - 인웅쌤 ${won(calc.inung)}`);
-
-    const tracked = calc.students.filter((s) => s.sessions?.enabled);
-    if (tracked.length) {
-      L.push('');
-      L.push(`■ 4회권 진행 (${tracked.length}명)`);
-      L.push(tracked.map((s) => `${s.name} ${Math.max(0, Number(s.sessions.done) || 0)}/${Math.max(1, Number(s.sessions.goal) || 4)}회`).join(' · '));
-    }
-    return L.join('\n');
-  };
-
-  const kakaoRemindText = () =>
-    [
-      '안녕하세요, IMAP Studio입니다 😊',
-      `${ymLabel} 레슨비 안내드려요.`,
-      '',
-      '아직 입금이 확인되지 않아 연락드렸어요.',
-      '보내주실 때 학생 이름으로 입금해 주시면 확인이 빨라집니다.',
-      '',
-      '확인 부탁드리고, 궁금한 점 있으면 편하게 연락 주세요.',
-      '— IMAP Studio 지애쌤'
-    ].join('\n');
-
-  const copyText = async (text, message) => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        showToast(message);
-        return;
-      }
-      throw new Error('clipboard unavailable');
-    } catch (err) {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast(message);
-      } catch (e) {
-        showToast('복사하지 못했어요. 문구를 길게 눌러 복사해 주세요.');
-      }
-    }
-  };
-
   const manageAuto = data.manageFee.mode === 'auto';
-  const kakaoText = kakaoTab === 'summary' ? kakaoSummaryText() : kakaoRemindText();
 
   return (
     <section className="fee-page">
@@ -796,14 +707,6 @@ function FeePageActive({ year, month }) {
                 aria-label="학생 검색"
               />
             </label>
-            <button
-              type="button"
-              className="fee-btn green"
-              onClick={() => copyText(kakaoSummaryText(), '카톡 요약을 복사했어요 ✓')}
-            >
-              <Copy size={14} />
-              카톡 요약 복사
-            </button>
             <button type="button" className="fee-btn primary" onClick={() => setEditing({ mode: 'add', student: null })}>
               <Plus size={14} />
               학생 추가
@@ -960,7 +863,7 @@ function FeePageActive({ year, month }) {
         </div>
       </div>
 
-      {/* 하단: 정산 요약 + 카톡 문구 */}
+      {/* 하단: 정산 요약 */}
       <div className="fee-bottom">
         <div className="fee-card fee-payout">
           <div className="fee-card-head">
@@ -1208,29 +1111,6 @@ function FeePageActive({ year, month }) {
               {' '}· 비율·단가·인원을 바꾸면 바로 다시 계산됩니다
             </div>
           </div>
-        </div>
-
-        <div className="fee-card fee-kakao">
-          <div className="fee-card-head">
-            <h3>💬 복사할 문구</h3>
-            <div className="fee-seg">
-              <button type="button" className={kakaoTab === 'summary' ? 'on' : ''} onClick={() => setKakaoTab('summary')}>정산 요약</button>
-              <button type="button" className={kakaoTab === 'remind' ? 'on' : ''} onClick={() => setKakaoTab('remind')}>미납 안내</button>
-            </div>
-          </div>
-          <pre className="fee-kakao-text">{kakaoText}</pre>
-          <button
-            type="button"
-            className="fee-btn green wide"
-            onClick={() => copyText(kakaoText, '문구를 복사했어요 ✓')}
-          >
-            <Copy size={14} />
-            이 내용 복사하기
-          </button>
-          <p className="fee-kakao-foot">
-            {ymLabel} · 수강생 {calc.students.length}명 · 미확인 {calc.unpaid.length}명
-            {calc.exempt.length ? ` · 면제 ${calc.exempt.length}명` : ''} · {ready ? '클라우드에 자동 저장 중' : '불러오는 중'}
-          </p>
         </div>
       </div>
 

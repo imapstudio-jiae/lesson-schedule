@@ -285,7 +285,7 @@
 .fee-mobile-list { display: none; }
 
 /* ── 하단 정산 ── */
-.fee-bottom { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.fee-bottom { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 
 .fee-pay-lines { display: flex; flex-direction: column; gap: 1px; }
 .fee-pay-line {
@@ -392,15 +392,6 @@
 .fee-split-foot { margin-top: 9px; font-size: 10.5px; color: #a9a3bd; line-height: 1.55; word-break: keep-all; }
 
 /* ── 카톡 문구 ── */
-.fee-seg { display: inline-flex; background: #f5f3fb; border-radius: 10px; padding: 3px; gap: 3px; }
-.fee-seg button { font-size: 11.5px; font-weight: 800; color: #7a7492; padding: 6px 10px; border-radius: 8px; }
-.fee-seg button.on { background: #fff; color: var(--fee-lav-ink); box-shadow: 0 3px 10px -4px rgba(80, 60, 150, 0.4); }
-.fee-kakao-text {
-  margin: 0; padding: 13px 14px; border-radius: 14px; background: #faf9fe; border: 1px solid var(--fee-line);
-  font-family: inherit; font-size: 12px; line-height: 1.7; color: var(--fee-ink2);
-  white-space: pre-wrap; word-break: break-word; max-height: none; overflow: auto;
-}
-.fee-kakao-foot { margin: 9px 2px 0; font-size: 10.5px; color: #a9a3bd; text-align: center; }
 
 /* ── 모달 ── */
 .fee-modal-overlay {
@@ -587,7 +578,6 @@
   .fee-confirm-title { font-size: 16px; }
   .fee-confirm-btn { min-height: 52px; font-size: 15.5px; }
   .fee-field-grid { grid-template-columns: 1fr; }
-  .fee-kakao-text { max-height: 300px; }
   .fee-cutoff { padding: 24px 18px 22px; border-radius: 18px; margin-top: 4px; }
   .fee-cutoff h3 { font-size: 17px; }
   .fee-cutoff-desc { font-size: 12.5px; }
