@@ -325,6 +325,7 @@
 .fee-split-amt { text-align: right; }
 .fee-split-amt b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; color: var(--fee-ink); font-variant-numeric: tabular-nums; }
 .fee-split-amt small { font-size: 10.5px; color: var(--fee-muted); line-height: 1.5; }
+.fee-split-amt .fee-move { color: var(--fee-ink2); font-size: 10px; font-weight: 700; }
 
 /* 추가 정산 */
 .fee-extra { margin-top: 12px; background: #fbfaff; border: 1px solid var(--fee-lav-line); border-radius: 14px; padding: 12px; }

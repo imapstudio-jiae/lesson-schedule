@@ -502,15 +502,20 @@ function FeePageActive({ year, month }) {
     const jiaeLesson = Math.round((lessonBase * ratio) / 100);
     const inungLesson = lessonBase - jiaeLesson;
 
-    const jiae = jiaeLesson + baseExtra + customJiae;
-    const inung = inungLesson + customInung;
+    // 추가 정산은 입금액 위에 더 얹는 돈이 아니라 두 사람 몫 사이에서 옮기는 돈이다.
+    //   홈페이지 개발·관리비 + 학생 관리비 + 지애 님 항목 → 인웅쌤 몫에서 차감해 지애 님 몫에 더함
+    //   인웅쌤 항목 → 지애 님 몫에서 차감해 인웅쌤 몫에 더함
+    // 그래서 두 사람 몫을 합하면 언제나 입금 확인 금액과 똑같아진다.
     const extraToJiae = baseExtra + customJiae;
-    const grand = lessonBase + baseExtra + customJiae + customInung;
+    const transferToJiae = extraToJiae - customInung; // + 면 인웅쌤 → 지애, − 면 지애 → 인웅쌤
+    const jiae = jiaeLesson + transferToJiae;
+    const inung = inungLesson - transferToJiae;
+    const grand = jiae + inung; // = lessonBase (입금 확인 금액)
 
     return {
       students, paid, unpaid, exempt, paidAmt, unpaidAmt, exemptAmt, total, lessonBase, pct,
       ratio, homeFee, manageFee, baseExtra, customJiae, customInung,
-      jiaeLesson, inungLesson, jiae, inung, extraToJiae, grand
+      jiaeLesson, inungLesson, jiae, inung, extraToJiae, transferToJiae, grand
     };
   }, [data]);
 
@@ -643,7 +648,7 @@ function FeePageActive({ year, month }) {
           <div className="fee-stat-icon">💰</div>
           <div className="fee-stat-label">이번 달 정산 합계</div>
           <div className="fee-stat-value">{num(calc.grand)}<span className="unit">원</span></div>
-          <div className="fee-stat-sub">실입금 {num(calc.lessonBase)} · 추가 {num(calc.extraToJiae + calc.customInung)}</div>
+          <div className="fee-stat-sub">실입금 {num(calc.lessonBase)} 그대로 배분</div>
         </div>
       </div>
 
@@ -653,8 +658,9 @@ function FeePageActive({ year, month }) {
         <p>
           <b>1시간 주 1회 160,000원</b> · <b>40분 주 2회 210,000원</b> · <b>1시간 주 2회 260,000원</b> 기준입니다.
           한수연 <b>150,000원</b>(1만 원 할인)처럼 학생별 단가는 표에서 바로 고칠 수 있어요.
-          배분은 <b>지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}%</b>이고, 홈페이지 개발·관리비와 학생 관리비는
-          <b> 배분 제외</b>로 지애 님 몫에 더합니다.
+          배분은 <b>지애 {calc.ratio}% · 인웅쌤 {100 - calc.ratio}%</b>로 나눈 뒤, 홈페이지 개발·관리비와 학생 관리비 같은 추가 정산은
+          <b> 인웅쌤이 가져갈 몫에서 차감</b>해 지애 님 몫에 더합니다. 없는 돈을 더하는 게 아니라 두 사람 몫 사이에서 옮기는 것이라,
+          두 사람 몫을 합하면 언제나 입금 확인 금액과 똑같습니다.
           레슨비 배분은 <b>입금 확인된 금액만</b> 기준으로 나누며, 미확인·면제는 배분에서 빠집니다(입금 확인되면 바로 반영).
           학생 관리비는 입금 여부와 상관없이 <b>등록된 전체 학생 수</b> 기준입니다.
           {data.note ? <> {data.note}</> : null}
@@ -876,8 +882,11 @@ function FeePageActive({ year, month }) {
             <div className="fee-pay-line paid"><span>입금 확인 <small>배분 기준</small></span><b>{won(calc.paidAmt)}</b></div>
             <div className="fee-pay-line unpaid"><span>아직 미확인 <small>배분 제외</small></span><b>{won(calc.unpaidAmt)}</b></div>
             <div className="fee-pay-line"><span>면제</span><b>{won(calc.exemptAmt)}{calc.exempt.length ? ` (${calc.exempt.length}명)` : ''}</b></div>
-            <div className="fee-pay-line extra"><span>추가 정산 <small>배분 제외 · 지애 님</small></span><b>{signed(calc.extraToJiae)}</b></div>
-            <div className="fee-pay-line grand"><span>최종 정산 합계</span><b>{won(calc.grand)}</b></div>
+            <div className="fee-pay-line extra">
+              <span>추가 정산 <small>{calc.transferToJiae === 0 ? '이동 없음' : (calc.transferToJiae > 0 ? '인웅쌤 몫에서 지애 님 몫으로' : '지애 님 몫에서 인웅쌤 몫으로')}</small></span>
+              <b>{calc.transferToJiae === 0 ? won(0) : signed(Math.abs(calc.transferToJiae))}</b>
+            </div>
+            <div className="fee-pay-line grand"><span>최종 정산 합계 <small>입금 확인 금액과 동일</small></span><b>{won(calc.grand)}</b></div>
           </div>
 
           <div className="fee-progress"><i style={{ width: `${calc.pct}%` }} /></div>
@@ -907,7 +916,10 @@ function FeePageActive({ year, month }) {
               </span>
               <span className="fee-split-amt">
                 <b>{won(calc.jiae)}</b>
-                <small>레슨비 {won(calc.jiaeLesson)}<br />+ 추가 정산 {signed(calc.extraToJiae)}</small>
+                <small>
+                  레슨비 {calc.ratio}% {won(calc.jiaeLesson)}
+                  {calc.transferToJiae !== 0 ? <><br />추가 정산 {signed(calc.transferToJiae)} <span className="fee-move">({calc.transferToJiae > 0 ? '인웅쌤 몫에서' : '인웅쌤 몫으로'})</span></> : null}
+                </small>
               </span>
             </div>
 
@@ -918,14 +930,17 @@ function FeePageActive({ year, month }) {
               </span>
               <span className="fee-split-amt">
                 <b>{won(calc.inung)}</b>
-                <small>레슨비 {won(calc.inungLesson)}{calc.customInung ? <><br />추가·차감 {signed(calc.customInung)}</> : null}</small>
+                <small>
+                  레슨비 {100 - calc.ratio}% {won(calc.inungLesson)}
+                  {calc.transferToJiae !== 0 ? <><br />추가 정산 {signed(-calc.transferToJiae)} <span className="fee-move">({calc.transferToJiae > 0 ? '지애 님 몫으로' : '지애 님 몫에서'})</span></> : null}
+                </small>
               </span>
             </div>
 
             <div className="fee-extra">
               <div className="fee-extra-title">
-                <span>추가 정산 <em>배분 제외 · 지애 님 전액</em></span>
-                <span className="fee-tag">배분 제외</span>
+                <span>추가 정산 <em>{calc.transferToJiae >= 0 ? '인웅쌤 몫에서 차감해 지애 님 몫에 더함' : '지애 님 몫에서 차감해 인웅쌤 몫에 더함'}</em></span>
+                <span className="fee-tag">몫 사이 이동</span>
               </div>
 
               <div className="fee-extra-row">
@@ -1009,6 +1024,7 @@ function FeePageActive({ year, month }) {
                         value={it.target}
                         onChange={(e) => updateItem(it.id, { target: e.target.value })}
                         aria-label="정산 대상"
+                        title="지애 님 항목은 인웅쌤 몫에서 차감해 지애 님 몫에 더하고, 인웅쌤 항목은 반대로 옮깁니다"
                       >
                         <option value="jiae">지애 님</option>
                         <option value="inung">인웅쌤</option>
@@ -1062,6 +1078,7 @@ function FeePageActive({ year, month }) {
                   value={newItem.target}
                   onChange={(e) => setNewItem((p) => ({ ...p, target: e.target.value }))}
                   aria-label="새 항목 대상"
+                  title="지애 님 항목은 인웅쌤 몫에서 차감해 지애 님 몫에 더하고, 인웅쌤 항목은 반대로 옮깁니다"
                 >
                   <option value="jiae">지애 님</option>
                   <option value="inung">인웅쌤</option>
@@ -1093,8 +1110,8 @@ function FeePageActive({ year, month }) {
               </div>
 
               <div className="fee-extra-row sum">
-                <span>추가 정산 합계</span>
-                <b>{signed(calc.extraToJiae + calc.customInung)}</b>
+                <span>추가 정산 반영 합계 <em>{calc.transferToJiae >= 0 ? '인웅쌤 몫에서 차감' : '지애 님 몫에서 차감'}</em></span>
+                <b>{signed(calc.transferToJiae)}</b>
               </div>
             </div>
 
@@ -1103,11 +1120,14 @@ function FeePageActive({ year, month }) {
               <span className="fee-final-amounts">
                 <span>지애<b>{won(calc.jiae)}</b></span>
                 <span>인웅쌤<b>{won(calc.inung)}</b></span>
+                <span>합계<b>{won(calc.grand)}</b></span>
               </span>
             </div>
 
             <div className="fee-split-foot">
-              레슨비 {won(calc.lessonBase)} (입금 확인 기준) {calc.ratio}:{100 - calc.ratio} 배분 + 추가 정산 {signed(calc.extraToJiae + calc.customInung)}{calc.unpaidAmt ? ` · 미확인 ${won(calc.unpaidAmt)}은 배분 제외` : ''}
+              레슨비 {won(calc.lessonBase)}(입금 확인 기준)을 {calc.ratio}:{100 - calc.ratio}로 나누고
+              {calc.transferToJiae !== 0 ? `, 추가 정산 ${signed(Math.abs(calc.transferToJiae))}을 ${calc.transferToJiae > 0 ? '인웅쌤 몫에서 지애 님 몫으로' : '지애 님 몫에서 인웅쌤 몫으로'} 옮겨` : ''} 두 사람 몫 합계가 입금 확인 금액 {won(calc.grand)}과 같습니다
+              {calc.unpaidAmt ? ` · 미확인 ${won(calc.unpaidAmt)}은 배분 제외` : ''}
               {' '}· 비율·단가·인원을 바꾸면 바로 다시 계산됩니다
             </div>
           </div>
