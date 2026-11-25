@@ -1125,7 +1125,7 @@ function FeePageActive({ year, month }) {
             </div>
 
             <div className="fee-split-foot">
-              레슨비 {won(calc.lessonBase)}(입금 확인 기준)을 {calc.ratio}:{100 - calc.ratio}로 나누고
+              레슨비 {won(calc.lessonBase)}(입금 확인 기준)을 {calc.ratio}:{100 - calc.ratio} 비율로 나누고
               {calc.transferToJiae !== 0 ? `, 추가 정산 ${signed(Math.abs(calc.transferToJiae))}을 ${calc.transferToJiae > 0 ? '인웅쌤 몫에서 지애 님 몫으로' : '지애 님 몫에서 인웅쌤 몫으로'} 옮겨` : ''} 두 사람 몫 합계가 입금 확인 금액 {won(calc.grand)}과 같습니다
               {calc.unpaidAmt ? ` · 미확인 ${won(calc.unpaidAmt)}은 배분 제외` : ''}
               {' '}· 비율·단가·인원을 바꾸면 바로 다시 계산됩니다
