@@ -15,6 +15,7 @@ import {
   newId
 } from '../concertDefaults';
 import '../concert.css';
+import { useModalBack } from '../historyNav';
 
 const STATUS_CLASS = { '확정': 'confirmed', '후보': 'candidate', '미정': 'pending' };
 const EMPTY_ITEM = { performer: '', form: '솔로', song: '', status: '미정', memo: '' };
@@ -120,6 +121,9 @@ export default function ConcertPage() {
   const [showEditor, setShowEditor] = useState(null); // { mode: 'add' | 'edit' }
   const [draft, setDraft] = useState(EMPTY_ITEM);
   const [toast, setToast] = useState('');
+
+  // 휴대폰 뒤로 가기: 열린 공연 입력 창부터 닫히도록 히스토리에 연결
+  const closeEditor = useModalBack(Boolean(showEditor), () => setShowEditor(null));
 
   const dirtyRef = useRef(false);
   const editedRef = useRef(false);
@@ -299,21 +303,21 @@ export default function ConcertPage() {
       activeShowId: id,
       shows: [...d.shows, { id, ...payload, expectedTime: '', note: '', items: [] }]
     }));
-    setShowEditor(null);
+    closeEditor();
     showToast('새 공연을 만들었어요');
   };
 
   const handleEditShow = (payload) => {
     if (!activeShow) return;
     updateShow(activeShow.id, payload);
-    setShowEditor(null);
+    closeEditor();
     showToast('공연 정보를 저장했어요');
   };
 
   const handleDeleteShow = () => {
     if (!activeShow || data.shows.length <= 1) {
       showToast('공연은 최소 한 개는 남겨 두어야 해요');
-      setShowEditor(null);
+      closeEditor();
       return;
     }
     const id = activeShow.id;
@@ -321,7 +325,7 @@ export default function ConcertPage() {
       const shows = d.shows.filter((s) => s.id !== id);
       return { ...d, shows, activeShowId: shows[0].id };
     });
-    setShowEditor(null);
+    closeEditor();
     showToast('공연을 삭제했어요');
   };
 
@@ -405,7 +409,7 @@ export default function ConcertPage() {
               ? { title: activeShow.title, date: activeShow.date, meta: activeShow.meta }
               : EMPTY_SHOW
           }
-          onCancel={() => setShowEditor(null)}
+          onCancel={closeEditor}
           onSubmit={showEditor.mode === 'edit' ? handleEditShow : handleAddShow}
           onDelete={showEditor.mode === 'edit' ? handleDeleteShow : null}
         />

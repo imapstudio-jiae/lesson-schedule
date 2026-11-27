@@ -32,6 +32,7 @@ import {
   GripHorizontal
 } from 'lucide-react';
 import { COLOR_PALETTES } from '../constants';
+import { useModalBack } from '../historyNav';
 
 // ─── 드래그 가능한 카드 내부 항목(row) ─────────────────────────────────────────
 function SortableItem({ item, cardId, theme, onToggleItemCheck, onDeleteItemFromCard, onOpenDetailModal, isDraggingOver }) {
@@ -145,7 +146,8 @@ function SortableCard({
   onSaveTitle,
   onCancelEditTitle,
   setEditingTitleText,
-  setColorPickerCardId,
+  onToggleColorPicker,
+  onCloseColorPicker,
   setNewItemInputs,
   onUpdateCardColor,
   onDeleteCard,
@@ -281,7 +283,7 @@ function SortableCard({
           </button>
           <button 
             className="icon-btn" 
-            onClick={() => setColorPickerCardId(isPickingColor ? null : card.id)}
+            onClick={() => onToggleColorPicker(card.id)}
             title="카드 색상 변경"
           >
             <Palette size={14} />
@@ -326,7 +328,7 @@ function SortableCard({
               style={{ backgroundColor: c.badge, width: '22px', height: '22px' }}
               onClick={() => {
                 onUpdateCardColor(card.id, c.id);
-                setColorPickerCardId(null);
+                onCloseColorPicker();
               }}
               title={c.name}
             />
@@ -414,6 +416,19 @@ export default function MemoCardsSection({
   const [newItemInputs, setNewItemInputs] = useState({});
   const [activeCardId, setActiveCardId] = useState(null); // DragOverlay용
 
+  // 휴대폰 뒤로 가기: 열린 색상 팝업부터 닫히도록 히스토리에 연결
+  const closeColorPicker = useModalBack(Boolean(colorPickerCardId), () => setColorPickerCardId(null));
+
+  const handleToggleColorPicker = (cardId) => {
+    if (colorPickerCardId === cardId) closeColorPicker();
+    else setColorPickerCardId(cardId);
+  };
+
+  const handleCloseColorPicker = () => {
+    if (!colorPickerCardId) return;
+    closeColorPicker();
+  };
+
   const handleStartEditTitle = (card) => {
     setEditingCardId(card.id);
     setEditingTitleText(card.title);
@@ -439,7 +454,7 @@ export default function MemoCardsSection({
   const handleCardDragStart = (event) => {
     setActiveCardId(event.active.id);
     // 색상 피커 닫기
-    setColorPickerCardId(null);
+    handleCloseColorPicker();
   };
 
   const handleCardDragEnd = (event) => {
@@ -466,7 +481,8 @@ export default function MemoCardsSection({
     onSaveTitle: handleSaveTitle,
     onCancelEditTitle: handleCancelEditTitle,
     setEditingTitleText,
-    setColorPickerCardId,
+    onToggleColorPicker: handleToggleColorPicker,
+    onCloseColorPicker: handleCloseColorPicker,
     setNewItemInputs,
     onUpdateCardColor,
     onDeleteCard,

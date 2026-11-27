@@ -23,6 +23,12 @@ import {
 import { realtimeSync } from './realtimeSync';
 import { getSupabaseData, saveSupabaseData } from './supabase';
 import ToastNotification from './components/ToastNotification';
+import {
+  initHistoryNav,
+  pushTabState,
+  closeAllModals,
+  useModalBack
+} from './historyNav';
 
 export default function App({ onLock }) {
   // 현재 날짜 기준
@@ -82,6 +88,38 @@ export default function App({ onLock }) {
   // 모달 상태 (레슨 등록/수정 모달 및 메모 세부 모달)
   const [lessonModalCell, setLessonModalCell] = useState(null);
   const [selectedMemoDetail, setSelectedMemoDetail] = useState(null); // { card, item }
+
+  // 휴대폰 뒤로 가기: 열린 모달 → 이전 탭 순서로 되돌아가고, 앱은 바로 꺼지지 않는다.
+  const activeTabRef = useRef(activeTab);
+
+  useEffect(() => {
+    initHistoryNav(activeTabRef.current);
+
+    const handlePopState = (event) => {
+      const state = event.state && typeof event.state === 'object' ? event.state : {};
+      if (state.nav === 'tab') {
+        closeAllModals();
+        const tab = state.tab || 'schedule';
+        activeTabRef.current = tab;
+        setActiveTab(tab);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleChangeTab = useCallback((tab) => {
+    if (!tab || tab === activeTabRef.current) return;
+    closeAllModals();
+    pushTabState(tab);
+    activeTabRef.current = tab;
+    setActiveTab(tab);
+  }, []);
+
+  // 모달을 닫는 모든 경로(닫기·저장·취소·배경 터치)에서 히스토리 칸까지 함께 정리
+  const closeLessonModal = useModalBack(Boolean(lessonModalCell), () => setLessonModalCell(null));
+  const closeMemoDetailModal = useModalBack(Boolean(selectedMemoDetail), () => setSelectedMemoDetail(null));
 
   // 실시간 알림 팝업 및 변경 셀 반짝임(하이라이트) 상태
   const [toasts, setToasts] = useState([]);
@@ -801,7 +839,7 @@ export default function App({ onLock }) {
         onUpdateStudioTitle={handleUpdateStudioTitle}
         onLoadSampleData={handleLoadSampleData}
         activeTab={activeTab}
-        onChangeTab={setActiveTab}
+        onChangeTab={handleChangeTab}
         onLock={onLock}
       />
 
@@ -853,7 +891,7 @@ export default function App({ onLock }) {
       {/* 레슨 등록 및 수정 모달 (사용자가 일정 클릭 시에만 표시) */}
       <LessonModal
         isOpen={Boolean(lessonModalCell)}
-        onClose={() => setLessonModalCell(null)}
+        onClose={closeLessonModal}
         cellInfo={lessonModalCell}
         onSaveLesson={handleSaveLesson}
         onDeleteLesson={handleDeleteLesson}
@@ -872,7 +910,7 @@ export default function App({ onLock }) {
         return (
           <MemoDetailModal
             isOpen={Boolean(selectedMemoDetail)}
-            onClose={() => setSelectedMemoDetail(null)}
+            onClose={closeMemoDetailModal}
             card={currentCard}
             activeItem={currentItem}
             onSaveCardDetail={handleSaveCardDetail}

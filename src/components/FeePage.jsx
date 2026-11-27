@@ -13,6 +13,7 @@ import {
   DEFAULT_SESSION_GOAL
 } from '../feeDefaults';
 import '../fee.css';
+import { useModalBack } from '../historyNav';
 
 const nf = new Intl.NumberFormat('ko-KR');
 const num = (n) => nf.format(Math.round(Number(n) || 0));
@@ -376,6 +377,10 @@ function FeePageActive({ year, month }) {
   const [newItem, setNewItem] = useState({ label: '', target: 'jiae', sign: '-', amount: '' });
   const [statusConfirm, setStatusConfirm] = useState(null); // 확인 창을 띄운 학생
 
+  // 휴대폰 뒤로 가기: 열린 창부터 닫히도록 히스토리에 연결
+  const closeStudentModal = useModalBack(Boolean(editing), () => setEditing(null));
+  const closeStatusConfirm = useModalBack(Boolean(statusConfirm), () => setStatusConfirm(null));
+
   const dirtyRef = useRef(false);      // 저장 대기 중인 변경이 있는지
   const editedRef = useRef(false);     // 이번 달 화면에서 사용자가 직접 고쳤는지 (클라우드 덮어쓰기 방지)
   const toastTimer = useRef(null);
@@ -554,14 +559,13 @@ function FeePageActive({ year, month }) {
 
   // 배지 클릭 → 바로 바꾸지 않고 확인 창만 띄운다 (확인을 눌러야 변경)
   const requestStatusChange = (student) => setStatusConfirm(student);
-  const closeStatusConfirm = useCallback(() => setStatusConfirm(null), []);
 
   const confirmStatusChange = () => {
     if (!statusConfirm) return;
     // 실시간 동기화로 상태가 바뀌었을 수 있으니 지금 데이터 기준으로 계산
     const current = dataRef.current?.students?.find((s) => s.id === statusConfirm.id) || statusConfirm;
     const next = nextStatusOf(current.status);
-    setStatusConfirm(null);
+    closeStatusConfirm();
     cycleStatus(current.id);
     showToast(`${current.name} 님을 ‘${STATUS_LABEL[next]}’(으)로 바꿨어요`);
   };
@@ -577,14 +581,14 @@ function FeePageActive({ year, month }) {
       updateStudent(editing.student.id, payload);
       showToast('학생 정보를 저장했어요');
     }
-    setEditing(null);
+    closeStudentModal();
   };
 
   const handleDeleteStudent = () => {
     const id = editing?.student?.id;
     if (!id) return;
     apply((d) => ({ ...d, students: d.students.filter((s) => s.id !== id) }));
-    setEditing(null);
+    closeStudentModal();
     showToast('학생을 삭제했어요');
   };
 
@@ -1139,7 +1143,7 @@ function FeePageActive({ year, month }) {
         <StudentModal
           mode={editing.mode}
           initial={editing.student}
-          onClose={() => setEditing(null)}
+          onClose={closeStudentModal}
           onSave={handleSaveStudent}
           onDelete={handleDeleteStudent}
         />
