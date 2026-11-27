@@ -99,7 +99,7 @@ function SortableItem({ item, cardId, theme, onToggleItemCheck, onDeleteItemFrom
       </span>
 
       {/* 우측 버튼들 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
         <button
           type="button"
           className={`memo-item-note-icon-btn ${hasItemHistory ? 'has-note' : ''}`}

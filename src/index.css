@@ -1216,18 +1216,38 @@ input:focus, textarea:focus, select:focus {
   margin-left: 2px;
 }
 
+/* 항목 삭제(X) — 호버가 없는 모바일·태블릿에서도 항상 보이도록 기본 노출 */
 .memo-item-del-btn {
-  opacity: 0;
-  color: var(--color-text-tertiary);
-  transition: opacity 0.15s ease;
+  opacity: 0.85;
+  color: var(--color-text-muted);
+  padding: 4px 6px;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .memo-item-row:hover .memo-item-del-btn {
   opacity: 1;
 }
 
-.memo-item-del-btn:hover {
+.memo-item-del-btn:hover,
+.memo-item-del-btn:active {
+  opacity: 1;
   color: #DC2626;
+  background: #FEE2E2;
+}
+
+/* 모바일·터치 화면: 메모 아이콘과 삭제(X) 버튼의 터치 영역과 간격을 넉넉히 */
+@media (max-width: 640px), (hover: none) {
+  .memo-item-note-icon-btn {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 6px 8px;
+  }
+
+  .memo-item-del-btn {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 6px 8px;
+  }
 }
 
 /* 새 항목 추가 입력폼 */
